@@ -65,7 +65,7 @@ const applyJob = async (req, res) => {
 const getAppliedJobs = async (req, res) => {
   try {
     const userId = req.id;
-    const { page, limit, skip } = getPaginationParams(req, 10);
+    const { page, limit, skip } = getPaginationParams(req, 7);
 
     const query = { applicant: userId };
 
