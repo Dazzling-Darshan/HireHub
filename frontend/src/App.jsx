@@ -12,54 +12,93 @@ import CompanyCreate from './components/recruiter/CompanyCreate'
 import CompanySetup from './components/recruiter/CompanySetup'
 import AdminJobs from './components/recruiter/AdminJobs'
 import PostJob from './components/recruiter/PostJob'
+import EditJob from './components/recruiter/EditJob'
+import Applicants from './components/recruiter/Applicants'
+import PrivacyPolicy from './components/PrivacyPolicy'
+import TermsAndConditions from './components/TermsAndConditions'
+import ContactUs from './components/ContactUs'
+import HelpCenter from './components/HelpCenter'
+import FAQs from './components/FAQs'
+import ScrollToTop from './components/shared/ScrollToTop'
 
 
 const appRouter = createBrowserRouter([
   {
     path:'/',
-    element:<Home/>
+    element:<><ScrollToTop /><Home/></>
   },
   {
     path:'/login',
-    element:<Login/>
+    element:<><ScrollToTop /><Login/></>
   },
   {
     path:'/signup',
-    element:<Signup/>
-  },{
-    path:'/jobs',
-    element:<Jobs/>
-  },{
-    path:'/description/:id',
-    element:<JobDescription/>
-  },{
-    path:'/browse',
-    element:<Browse/>
+    element:<><ScrollToTop /><Signup/></>
   },
-  ,{
+  {
+    path:'/jobs',
+    element:<><ScrollToTop /><Jobs/></>
+  },
+  {
+    path:'/description/:id',
+    element:<><ScrollToTop /><JobDescription/></>
+  },
+  {
+    path:'/browse',
+    element:<><ScrollToTop /><Browse/></>
+  },
+  {
     path:'/profile',
-    element:<Profile/>
+    element:<><ScrollToTop /><Profile/></>
+  },
+  {
+    path:'/privacy',
+    element:<><ScrollToTop /><PrivacyPolicy/></>
+  },
+  {
+    path:'/terms',
+    element:<><ScrollToTop /><TermsAndConditions/></>
+  },
+  {
+    path:'/contact',
+    element:<><ScrollToTop /><ContactUs/></>
+  },
+  {
+    path:'/help',
+    element:<><ScrollToTop /><HelpCenter/></>
+  },
+  {
+    path:'/faqs',
+    element:<><ScrollToTop /><FAQs/></>
   },
   //recruiter
   {
     path : '/admin/companies',
-    element : <Companies/>
+    element : <><ScrollToTop /><Companies/></>
   },
   {
     path : '/admin/companies/create',
-    element : <CompanyCreate/>
+    element : <><ScrollToTop /><CompanyCreate/></>
   },
   {
     path : '/admin/companies/:id',
-    element : <CompanySetup/>
+    element : <><ScrollToTop /><CompanySetup/></>
   },
   {
     path : '/admin/jobs',
-    element : <AdminJobs/>
+    element : <><ScrollToTop /><AdminJobs/></>
   },
   {
     path : '/admin/jobs/create',
-    element : <PostJob/>
+    element : <><ScrollToTop /><PostJob/></>
+  },
+  {
+    path : '/admin/jobs/:id',
+    element : <><ScrollToTop /><EditJob/></>
+  },
+  {
+    path : '/admin/jobs/:id/applicants',
+    element : <><ScrollToTop /><Applicants/></>
   },
 
 ])

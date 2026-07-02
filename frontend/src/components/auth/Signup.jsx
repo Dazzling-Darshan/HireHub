@@ -21,19 +21,64 @@ const Signup = () => {
     role: "",
     file: "",
   });
+  const [errors, setErrors] = useState({});
   const loading = useSelector(store => store.auth.loading);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: "" });
+    }
   };
 
   const changeFileHandler = (e) => {
     setInput({ ...input, file: e.target.files?.[0] });
   };
 
+  const validate = () => {
+    const newErrors = {};
+    // Full Name validation: only letters and spaces
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (!input.fullName.trim()) {
+      newErrors.fullName = "Full Name is required";
+    } else if (!nameRegex.test(input.fullName.trim())) {
+      newErrors.fullName = "Full Name should only contain letters";
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!input.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(input.email.trim())) {
+      newErrors.email = "Please enter a valid email";
+    }
+    
+    // Phone number validation
+    if (!input.phoneNumber.trim()) {
+      newErrors.phoneNumber = "Phone Number is required";
+    }
+    
+    // Password validation: at least 8 characters
+    if (!input.password.trim()) {
+      newErrors.password = "Password is required";
+    } else if (input.password.trim().length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    }
+    
+    // Role validation
+    if (!input.role) {
+      newErrors.role = "Please select your role";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+
     try {
       const formData = new FormData();
       dispatch(setLoading(true));
@@ -58,7 +103,7 @@ const Signup = () => {
         toast.success(res.data.message);
       }
     } catch (error) {
-      console.log(error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Signup failed");
     }finally{
       dispatch(setLoading(false));
     }
@@ -85,7 +130,11 @@ const Signup = () => {
                 name="fullName"
                 value={input.fullName}
                 onChange={changeEventHandler}
+                className={errors.fullName ? 'border-red-500 focus:ring-red-200' : ''}
               />
+              {errors.fullName && (
+                <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
+              )}
             </div>
 
             <div>
@@ -95,7 +144,11 @@ const Signup = () => {
                 name="email"
                 value={input.email}
                 onChange={changeEventHandler}
+                className={errors.email ? 'border-red-500 focus:ring-red-200' : ''}
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
             </div>
 
             <div>
@@ -105,7 +158,11 @@ const Signup = () => {
                 name="phoneNumber"
                 value={input.phoneNumber}
                 onChange={changeEventHandler}
+                className={errors.phoneNumber ? 'border-red-500 focus:ring-red-200' : ''}
               />
+              {errors.phoneNumber && (
+                <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>
+              )}
             </div>
 
             <div>
@@ -115,7 +172,11 @@ const Signup = () => {
                 name="password"
                 value={input.password}
                 onChange={changeEventHandler}
+                className={errors.password ? 'border-red-500 focus:ring-red-200' : ''}
               />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
             </div>
           </div>
 
@@ -143,7 +204,11 @@ const Signup = () => {
                 <Label>Recruiter</Label>
               </div>
             </RadioGroup>
-
+          </div>
+          {errors.role && (
+            <p className="text-red-500 text-sm mt-2">{errors.role}</p>
+          )}
+          <div className="flex flex-col md:flex-row justify-between mt-4 gap-4">
             {/* File Upload */}
             <div className="flex items-center gap-3 w-full">
               <Label>Profile</Label>

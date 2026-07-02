@@ -1,4 +1,8 @@
 import { Job } from "../models/job.model.js";
+import {
+  getPaginationParams,
+  buildPaginationResponse,
+} from "../utils/pagination.js";
 
 // CREATE JOB
 const postJob = async (req, res) => {
@@ -61,24 +65,98 @@ const postJob = async (req, res) => {
   }
 };
 
+// UPDATE JOB
+const updateJob = async (req, res) => {
+  try {
+    const jobId = req.params.id;
+    const {
+      title,
+      description,
+      requirements,
+      salary,
+      location,
+      jobType,
+      experience,
+      position,
+    } = req.body;
+
+    const userId = req.id;
+
+    let job = await Job.findOne({ _id: jobId, createdBy: userId });
+
+    if (!job) {
+      return res.status(404).json({
+        message: "Job not found or you don't have permission to edit it",
+        success: false,
+      });
+    }
+
+    if (title) job.title = title;
+    if (description) job.description = description;
+    if (requirements) job.requirements = requirements.split(",");
+    if (salary) job.salary = Number(salary);
+    if (location) job.location = location;
+    if (jobType) job.jobType = jobType;
+    if (experience) job.experience = experience;
+    if (position) job.position = Number(position);
+
+    await job.save();
+
+    return res.status(200).json({
+      message: "Job updated successfully",
+      success: true,
+      job,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false,
+    });
+  }
+};
+
 // GET ALL JOBS
 const getAllJobs = async (req, res) => {
   try {
     const keyword = req.query.keyword || "";
+    const hasPagination =
+      req.query.page !== undefined || req.query.limit !== undefined;
 
-    const query = {
-      $or: [
-        { title: { $regex: keyword, $options: "i" } },
-        { description: { $regex: keyword, $options: "i" } },
-      ],
-    };
+    const query = keyword
+      ? {
+          $or: [
+            { title: { $regex: keyword, $options: "i" } },
+            { description: { $regex: keyword, $options: "i" } },
+          ],
+        }
+      : {};
 
-    const jobs = await Job.find(query).populate({
-        path :"company"
-    }).sort({createdAt : -1});
+    if (!hasPagination) {
+      const jobs = await Job.find(query)
+        .populate({ path: "company" })
+        .sort({ createdAt: -1 });
+
+      return res.status(200).json({
+        jobs,
+        success: true,
+      });
+    }
+
+    const { page, limit, skip } = getPaginationParams(req, 9);
+
+    const [jobs, total] = await Promise.all([
+      Job.find(query)
+        .populate({ path: "company" })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Job.countDocuments(query),
+    ]);
 
     return res.status(200).json({
       jobs,
+      pagination: buildPaginationResponse(page, limit, total),
       success: true,
     });
   } catch (error) {
@@ -127,23 +205,31 @@ const getJobById = async (req, res) => {
 const getAdminJobs = async (req, res) => {
   try {
     const recruiterId = req.id;
+    const { page, limit, skip } = getPaginationParams(req, 10);
+    const keyword = req.query.keyword || "";
 
-    const jobs = await Job.find({ createdBy: recruiterId }).populate({
-      path: "company"
-    });
-
-    if (jobs.length === 0) {
-      return res.status(200).json({
-        message: "No jobs found",
-        success: true,
-        jobs: []
-      });
+    const query = { createdBy: recruiterId };
+    if (keyword) {
+      query.$or = [
+        { title: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ];
     }
 
+    const [jobs, total] = await Promise.all([
+      Job.find(query)
+        .populate({ path: "company" })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Job.countDocuments(query),
+    ]);
+
     return res.status(200).json({
-      message: "Jobs found",
+      message: total === 0 ? "No jobs found" : "Jobs found",
       success: true,
       jobs,
+      pagination: buildPaginationResponse(page, limit, total),
     });
   } catch (error) {
     console.log(error);
@@ -156,6 +242,7 @@ const getAdminJobs = async (req, res) => {
 
 export default {
   postJob,
+  updateJob,
   getAllJobs,
   getJobById,
   getAdminJobs,

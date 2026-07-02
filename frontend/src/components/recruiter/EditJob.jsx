@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
@@ -21,12 +21,17 @@ import {
 } from "../ui/select";
 import { JOB_API_ENDPOINT } from "@/utils/constant";
 import useGetAllCompanies from "@/hooks/useGetAllCompanies";
+import useGetJobById from "@/hooks/useGetJobById";
 
-const PostJob = () => {
+const EditJob = () => {
   const navigate = useNavigate();
+  const params = useParams();
 
   useGetAllCompanies(1, 10, "", true);
   const { companies = [] } = useSelector((store) => store.company);
+  const { singleJob } = useSelector((store) => store.job);
+  
+  useGetJobById(params.id);
 
   const [input, setInput] = useState({
     title: "",
@@ -42,6 +47,23 @@ const PostJob = () => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  // Populate input when singleJob changes
+  useEffect(() => {
+    if (singleJob) {
+      setInput({
+        title: singleJob.title || "",
+        description: singleJob.description || "",
+        requirements: singleJob.requirements?.join(", ") || "",
+        salary: singleJob.salary || "",
+        location: singleJob.location || "",
+        jobType: singleJob.jobType || "",
+        experience: singleJob.experience || "",
+        position: singleJob.position || "",
+        companyId: singleJob.company?._id || "",
+      });
+    }
+  }, [singleJob]);
 
   const validate = () => {
     const newErrors = {};
@@ -97,9 +119,6 @@ const PostJob = () => {
     } else if (Number(input.position) <= 0) {
       newErrors.position = "Number of positions must be at least 1";
     }
-    if (!input.companyId) {
-      newErrors.companyId = "Please select a company";
-    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -110,15 +129,6 @@ const PostJob = () => {
     if (errors[name]) {
       const tempErrors = { ...errors };
       delete tempErrors[name];
-      setErrors(tempErrors);
-    }
-  };
-
-  const selectCompanyHandler = (value) => {
-    setInput({ ...input, companyId: value });
-    if (errors.companyId) {
-      const tempErrors = { ...errors };
-      delete tempErrors.companyId;
       setErrors(tempErrors);
     }
   };
@@ -135,18 +145,18 @@ const PostJob = () => {
         position: Number(input.position),
       };
 
-      const res = await axios.post(
-        `${JOB_API_ENDPOINT}/post`,
+      const res = await axios.put(
+        `${JOB_API_ENDPOINT}/update/${params.id}`,
         payload,
         { withCredentials: true }
       );
 
       if (res.data.success) {
-        toast.success("Job posted successfully!");
+        toast.success("Job updated successfully!");
         navigate("/admin/jobs");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to post job");
+      toast.error(error.response?.data?.message || "Failed to update job");
       console.error(error);
     } finally {
       setLoading(false);
@@ -172,10 +182,10 @@ const PostJob = () => {
               </Button>
               <div>
                 <h1 className="text-3xl font-bold text-[#0F172A]">
-                  Create New Job
+                  Edit Job
                 </h1>
                 <p className="text-[#64748B] mt-1">
-                  Post a new job opening for one of your registered companies.
+                  Update the job details.
                 </p>
               </div>
             </div>
@@ -184,7 +194,7 @@ const PostJob = () => {
             {companies.length === 0 && (
               <div className="mb-6 rounded-lg border border-[#EF4444]/30 bg-[#EF4444]/5 p-4">
                 <p className="text-sm font-medium text-[#EF4444]">
-                  Please register a company first before posting a job.
+                  Please register a company first before editing a job.
                 </p>
               </div>
             )}
@@ -354,15 +364,15 @@ const PostJob = () => {
                 )}
               </div>
 
-              {/* Company Select */}
+              {/* Company Select (Disabled) */}
               <div className="md:col-span-2 space-y-2">
-                <Label className="text-[#0F172A]">Select Company</Label>
+                <Label className="text-[#0F172A]">Company</Label>
                 <Select
-                  onValueChange={selectCompanyHandler}
                   value={input.companyId}
+                  disabled
                 >
-                  <SelectTrigger className={`w-full ${errors.companyId ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}>
-                    <SelectValue placeholder="Choose a registered company" />
+                  <SelectTrigger className="w-full border-[#E2E8F0] cursor-not-allowed bg-gray-50">
+                    <SelectValue placeholder="Company" />
                   </SelectTrigger>
                   <SelectContent className="border-[#E2E8F0]">
                     <SelectGroup>
@@ -374,11 +384,9 @@ const PostJob = () => {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                {errors.companyId && (
-                  <p className="text-sm font-medium text-[#EF4444]">
-                    {errors.companyId}
-                  </p>
-                )}
+                <p className="text-sm text-[#64748B]">
+                  Company cannot be changed after job creation.
+                </p>
               </div>
 
               {/* Submit Button */}
@@ -396,7 +404,7 @@ const PostJob = () => {
                   disabled={loading || companies.length === 0}
                   className="h-11 bg-[#2563EB] hover:bg-[#1D4ED8] transition-all duration-200 shadow-sm"
                 >
-                  {loading ? "Posting Job..." : "Post New Job"}
+                  {loading ? "Updating Job..." : "Update Job"}
                 </Button>
               </div>
             </form>
@@ -408,4 +416,4 @@ const PostJob = () => {
   );
 };
 
-export default PostJob;
+export default EditJob;

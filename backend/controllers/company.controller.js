@@ -1,6 +1,10 @@
 import { Company } from '../models/company.model.js';
 import cloudinary from '../utils/cloudinary.js';
 import getDataUri from '../utils/datauri.js';
+import {
+    getPaginationParams,
+    buildPaginationResponse,
+} from '../utils/pagination.js';
 
 // REGISTER COMPANY
 const registerCompany = async (req, res) => {
@@ -48,20 +52,36 @@ const registerCompany = async (req, res) => {
 const getCompanies = async (req, res) => {
     try {
         const userId = req.id;
+        const hasPagination =
+            req.query.page !== undefined || req.query.limit !== undefined;
+        const keyword = req.query.keyword || "";
 
-        const companies = await Company.find({ createdBy: userId });
+        const query = { createdBy: userId };
+        if (keyword) {
+            query.name = { $regex: keyword, $options: "i" };
+        }
 
-        if (companies.length === 0) {
-            return res.status(404).json({
-                message: "No companies found",
-                success: false
+        if (!hasPagination) {
+            const companies = await Company.find(query).sort({ createdAt: -1 });
+            return res.status(200).json({
+                message: companies.length === 0 ? "No companies found" : "Companies fetched successfully",
+                success: true,
+                companies,
             });
         }
 
+        const { page, limit, skip } = getPaginationParams(req, 10);
+
+        const [companies, total] = await Promise.all([
+            Company.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+            Company.countDocuments(query),
+        ]);
+
         return res.status(200).json({
-            message: "Companies fetched successfully",
+            message: total === 0 ? "No companies found" : "Companies fetched successfully",
             success: true,
-            companies
+            companies,
+            pagination: buildPaginationResponse(page, limit, total),
         });
 
     } catch (error) {
@@ -107,10 +127,6 @@ const updateCompany = async (req, res) => {
     try {
         const { name, description, website, location } = req.body;
         const file = req.file;
-
-        const fileUri = getDataUri(file);
-        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-        const logo = cloudResponse.secure_url;
         
         const updateData = {};
 
@@ -118,7 +134,12 @@ const updateCompany = async (req, res) => {
         if (description) updateData.description = description;
         if (website) updateData.website = website;
         if (location) updateData.location = location;
-        if (logo) updateData.logo = logo;
+
+        if (file) {
+            const fileUri = getDataUri(file);
+            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+            updateData.logo = cloudResponse.secure_url;
+        }
 
         if (Object.keys(updateData).length === 0) {
             return res.status(400).json({

@@ -1,44 +1,82 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Search } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { setSearchedQuery } from "@/redux/jobSlice";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const [query, setQuery] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const searchJobHandler = () => {
+    dispatch(setSearchedQuery(query));
+    navigate("/browse");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") searchJobHandler();
+  };
+
   return (
-    <div className="text-center px-4">
+    <div className="text-center px-4 bg-[#F8FAFC]">
       <div className="flex flex-col gap-6 my-16 max-w-4xl mx-auto">
-        
+
         {/* Badge */}
-        <span className="px-5 py-2 mx-auto rounded-full bg-linear-to-r from-orange-100 to-orange-50 text-[#F83002] font-semibold text-sm shadow-sm">
+        <span className="px-5 py-2 mx-auto rounded-full bg-blue-50 text-[#2563EB] font-semibold text-sm border border-blue-100 shadow-sm">
           🚀 No. 1 Job Hunt Platform
         </span>
 
         {/* Heading */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight">
-          Search, Apply & <br />
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight text-[#0F172A]">
+          Search, Apply &amp; <br />
           Get Your{" "}
-          <span className="bg-linear-to-r from-[#6A38C2] to-purple-500 bg-clip-text text-transparent">
+          <span className="text-[#2563EB]">
             Dream Job
           </span>
         </h1>
 
         {/* Description */}
-        <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+        <p className="text-[#64748B] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
           Discover thousands of job opportunities tailored just for you. Start
           your journey today and land your dream career effortlessly.
         </p>
 
         {/* Search Bar */}
-        <div className="flex w-full sm:w-[70%] md:w-[60%] lg:w-[50%] shadow-xl border border-gray-200 px-4 py-2 rounded-full items-center gap-3 mx-auto bg-white hover:shadow-2xl transition duration-300">
-          
+        <div className="flex w-full sm:w-[70%] md:w-[60%] lg:w-[50%] shadow-md border border-[#E2E8F0] px-4 py-2 rounded-full items-center gap-3 mx-auto bg-white hover:shadow-lg hover:border-[#2563EB] transition-all duration-300">
           <input
             type="text"
-            placeholder="🔍 Find your dream job..."
-            className="outline-none border-none w-full text-gray-700 placeholder-gray-400"
+            placeholder="Job title, company, or keyword..."
+            className="outline-none border-none w-full text-[#0F172A] placeholder-[#64748B] bg-transparent text-sm"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
-
-          <Button className="rounded-full bg-[#6A38C2] hover:bg-purple-700 transition duration-300 px-5 py-2">
-            <Search className="h-5 w-5 text-white" />
+          <Button
+            className="rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] transition-all duration-200 px-4 py-2 shadow-sm"
+            onClick={searchJobHandler}
+          >
+            <Search className="h-4 w-4 text-white" />
           </Button>
+        </div>
+
+        {/* Stats row */}
+        <div className="flex items-center justify-center gap-8 mt-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-[#0F172A]">10K+</p>
+            <p className="text-xs text-[#64748B] mt-0.5">Active Jobs</p>
+          </div>
+          <div className="w-px h-8 bg-[#E2E8F0]" />
+          <div className="text-center">
+            <p className="text-2xl font-bold text-[#0F172A]">500+</p>
+            <p className="text-xs text-[#64748B] mt-0.5">Companies</p>
+          </div>
+          <div className="w-px h-8 bg-[#E2E8F0]" />
+          <div className="text-center">
+            <p className="text-2xl font-bold text-[#10B981]">95%</p>
+            <p className="text-xs text-[#64748B] mt-0.5">Placement Rate</p>
+          </div>
         </div>
 
       </div>

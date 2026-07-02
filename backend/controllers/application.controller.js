@@ -1,5 +1,9 @@
 import { Application } from "../models/application.model.js";
 import { Job } from "../models/job.model.js";
+import {
+  getPaginationParams,
+  buildPaginationResponse,
+} from "../utils/pagination.js";
 
 // APPLY JOB
 const applyJob = async (req, res) => {
@@ -61,28 +65,28 @@ const applyJob = async (req, res) => {
 const getAppliedJobs = async (req, res) => {
   try {
     const userId = req.id;
+    const { page, limit, skip } = getPaginationParams(req, 10);
 
-    const applications = await Application.find({
-      applicant: userId,
-    })
-      .sort({ createdAt: -1 })
-      .populate({
-        path: "job",
-        populate: {
-          path: "company",
-        },
-      });
+    const query = { applicant: userId };
 
-    if (applications.length === 0) {
-      return res.status(404).json({
-        message: "No applications found",
-        success: false,
-      });
-    }
+    const [applications, total] = await Promise.all([
+      Application.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: "job",
+          populate: {
+            path: "company",
+          },
+        }),
+      Application.countDocuments(query),
+    ]);
 
     return res.status(200).json({
       success: true,
       applications,
+      pagination: buildPaginationResponse(page, limit, total),
     });
   } catch (error) {
     console.log(error);
@@ -97,14 +101,9 @@ const getAppliedJobs = async (req, res) => {
 const getApplicant = async (req, res) => {
   try {
     const jobId = req.params.id;
+    const { page, limit, skip } = getPaginationParams(req, 10);
 
-    const job = await Job.findById(jobId).populate({
-      path: "applications",
-      options: { sort: { createdAt: -1 } },
-      populate: {
-        path: "applicant",
-      },
-    });
+    const job = await Job.findById(jobId).populate({ path: "company" });
 
     if (!job) {
       return res.status(404).json({
@@ -113,9 +112,35 @@ const getApplicant = async (req, res) => {
       });
     }
 
+    const [applications, total, statusCounts] = await Promise.all([
+      Application.find({ job: jobId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({ path: "applicant" }),
+      Application.countDocuments({ job: jobId }),
+      Application.aggregate([
+        { $match: { job: job._id } },
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const stats = { total: 0, accepted: 0, rejected: 0, pending: 0 };
+    statusCounts.forEach(({ _id, count }) => {
+      stats.total += count;
+      if (_id === "accepted") stats.accepted = count;
+      else if (_id === "rejected") stats.rejected = count;
+      else if (_id === "pending") stats.pending = count;
+    });
+
     return res.status(200).json({
       success: true,
-      job,
+      job: {
+        ...job.toObject(),
+        applications,
+      },
+      stats,
+      pagination: buildPaginationResponse(page, limit, total),
     });
   } catch (error) {
     console.log(error);

@@ -1,50 +1,45 @@
 import React from "react";
-import { Badge } from "./ui/badge";
+import { useNavigate } from "react-router-dom";
+import { MapPin, Briefcase } from "lucide-react";
 
-const LatestJobCards = ({job}) => {
+const LatestJobCards = ({ job }) => {
+  const navigate = useNavigate();
+
   return (
     <div
-      className="p-6 rounded-2xl shadow-md bg-white border border-gray-100 cursor-pointer 
-                    hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+      className="p-5 rounded-xl bg-white border border-[#E2E8F0] hover:border-[#2563EB] hover:shadow-md transition-all duration-200 cursor-pointer group"
+      onClick={() => navigate(`/description/${job?._id}`)}
     >
-      {/* Company Info */}
-      <div className="mb-3">
-        <h1 className="font-semibold text-lg text-gray-800 tracking-tight">
-          {job?.company?.name}
-        </h1>
-        <p className="text-sm text-gray-500">India</p>
+      {/* Company row */}
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <p className="font-semibold text-sm text-[#0F172A] group-hover:text-[#2563EB] transition-colors duration-200">
+            {job?.company?.name}
+          </p>
+          <div className="flex items-center gap-1 mt-0.5">
+            <MapPin className="w-3 h-3 text-[#64748B]" />
+            <span className="text-xs text-[#64748B]">India</span>
+          </div>
+        </div>
+        <span className="text-xs text-[#10B981] font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+          {job?.salary} LPA
+        </span>
       </div>
 
-      {/* Job Info */}
-      <div className="mb-4">
-        <h1 className="font-bold text-xl text-gray-900 mb-1">{job?.title}</h1>
-        <p className="text-sm text-gray-600 leading-relaxed">
-          {job?.description}
-        </p>
-      </div>
+      {/* Job title */}
+      <h3 className="font-bold text-base text-[#0F172A] mb-1">{job?.title}</h3>
+      <p className="text-xs text-[#64748B] leading-relaxed line-clamp-2 mb-3">
+        {job?.description}
+      </p>
 
       {/* Tags */}
-      <div className="flex items-center flex-wrap gap-3 mt-2">
-        <Badge
-          className="bg-blue-50 text-blue-700 font-semibold px-3 py-1 rounded-full hover:bg-blue-100 transition"
-          variant="ghost"
-        >
+      <div className="flex items-center flex-wrap gap-1.5">
+        <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-[#2563EB] border border-blue-100 font-medium">
           {job?.position} Positions
-        </Badge>
-
-        <Badge
-          className="bg-red-50 text-[#F83002] font-semibold px-3 py-1 rounded-full hover:bg-red-100 transition"
-          variant="ghost"
-        >
+        </span>
+        <span className="text-xs px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-100 font-medium">
           {job?.jobType}
-        </Badge>
-
-        <Badge
-          className="bg-purple-50 text-[#7209b7] font-semibold px-3 py-1 rounded-full hover:bg-purple-100 transition"
-          variant="ghost"
-        >
-          {job?.salary} LPA
-        </Badge>
+        </span>
       </div>
     </div>
   );

@@ -18,18 +18,45 @@ const Login = () => {
     password: "",
     role: "",
   });
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { loading } = useSelector(store => store.auth);
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: "" });
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!input.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(input.email.trim())) {
+      newErrors.email = "Please enter a valid email";
+    }
+    
+    // Password validation
+    if (!input.password.trim()) {
+      newErrors.password = "Password is required";
+    }
+    
+    if (!input.role) {
+      newErrors.role = "Please select your role";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
    const submitHandler = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+    
     try {
-      
       dispatch(setLoading(true));
       const res = await axios.post(`${USER_API_ENDPOINT}/login`,input,{
         withCredentials:true
@@ -42,14 +69,14 @@ const Login = () => {
       }
 
     } catch (error) {
-      console.log(error);
+      toast.error(error.response?.data?.message || "Login failed");
     } finally{
       dispatch(setLoading(false));
     }
   };
 
   return (
-    <div className="min-h-screen  from-gray-50 to-gray-100">
+    <div className="min-h-screen from-gray-50 to-gray-100">
       <Navbar />
 
       <div className="flex items-center justify-center px-4">
@@ -70,8 +97,11 @@ const Login = () => {
                 value={input.email}
                 name="email"
                 onChange={changeEventHandler}
-                className="mt-1 focus:ring-2 focus:ring-blue-500"
+                className={`mt-1 focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500 focus:ring-red-200' : ''}`}
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
             </div>
 
             <div>
@@ -82,8 +112,11 @@ const Login = () => {
                 value={input.password}
                 name="password"
                 onChange={changeEventHandler}
-                className="mt-1 focus:ring-2 focus:ring-blue-500"
+                className={`mt-1 focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500 focus:ring-red-200' : ''}`}
               />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
             </div>
           </div>
 
@@ -110,6 +143,9 @@ const Login = () => {
               <Label>Recruiter</Label>
             </div>
           </RadioGroup>
+          {errors.role && (
+            <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+          )}
           {
             loading? <Button className={'w-full my-4'}> <Loader2 className="mr-2 h-4 w-4 animate-spin"/>Please wait</Button>:
             <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 transition-all shadow-md">
