@@ -40,7 +40,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-[#0F172A]">Email</h3>
-                    <p className="text-sm text-[#64748B]">support@jobportal.com</p>
+                    <p className="text-sm text-[#64748B]">support@hirehub.com</p>
                   </div>
                 </div>
 
@@ -60,7 +60,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-[#0F172A]">Address</h3>
-                    <p className="text-sm text-[#64748B]">123 Job Street, Tech City, TC 10001</p>
+                    <p className="text-sm text-[#64748B]">123 Career Avenue, Tech Hub, TC 10001</p>
                   </div>
                 </div>
               </div>

@@ -43,6 +43,7 @@ const EditJob = () => {
     experience: "",
     position: "",
     companyId: "",
+    expiryDate: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -61,6 +62,7 @@ const EditJob = () => {
         experience: singleJob.experience || "",
         position: singleJob.position || "",
         companyId: singleJob.company?._id || "",
+        expiryDate: singleJob.expiryDate ? new Date(singleJob.expiryDate).toISOString().split('T')[0] : "",
       });
     }
   }, [singleJob]);
@@ -105,16 +107,16 @@ const EditJob = () => {
     } else if (!/^[a-zA-Z\s]+$/.test(input.jobType.trim())) {
       newErrors.jobType = "Job type can only contain letters and spaces";
     }
-    if (!input.experience.trim()) {
+    if (!input.experience || String(input.experience).trim() === "") {
       newErrors.experience = "Experience level is required (in years)";
-    } else if (!/^\d+$/.test(input.experience.trim())) {
+    } else if (!/^\d+$/.test(String(input.experience).trim())) {
       newErrors.experience = "Experience level must be a number (in years)";
     } else if (Number(input.experience) < 0) {
       newErrors.experience = "Experience level cannot be negative";
     }
-    if (!input.position.trim()) {
+    if (!input.position || String(input.position).trim() === "") {
       newErrors.position = "Number of positions is required";
-    } else if (!/^\d+$/.test(input.position.trim())) {
+    } else if (!/^\d+$/.test(String(input.position).trim())) {
       newErrors.position = "Number of positions must be a number";
     } else if (Number(input.position) <= 0) {
       newErrors.position = "Number of positions must be at least 1";
@@ -143,6 +145,7 @@ const EditJob = () => {
       const payload = {
         ...input,
         position: Number(input.position),
+        experience: Number(input.experience),
       };
 
       const res = await axios.put(
@@ -362,6 +365,24 @@ const EditJob = () => {
                     {errors.position}
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[#0F172A]">Expiry Date</Label>
+                <Input
+                  type="date"
+                  name="expiryDate"
+                  value={input.expiryDate}
+                  onChange={changeEventHandler}
+                  min={new Date().toISOString().split('T')[0]}
+                  className={`${errors.expiryDate ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                />
+                {errors.expiryDate && (
+                  <p className="text-sm font-medium text-[#EF4444]">
+                    {errors.expiryDate}
+                  </p>
+                )}
+                <p className="text-xs text-[#64748B]">Leave empty to keep current expiry date</p>
               </div>
 
               {/* Company Select (Disabled) */}

@@ -12,11 +12,18 @@ const Home = () => {
   useGetAllJobs();
   const { user } = useSelector(store => store.auth);
   const navigate = useNavigate();
+  
   useEffect(() => {
+    if (user?.role === "recruiter") {
+      navigate("/admin/companies");
+    }
+  }, [user, navigate]);
+
+  // Don't render home page if user is a recruiter (will redirect)
   if (user?.role === "recruiter") {
-    navigate("/admin/companies");
+    return null;
   }
-}, [user, navigate]);
+
   return (
     <div>
         <Navbar/>

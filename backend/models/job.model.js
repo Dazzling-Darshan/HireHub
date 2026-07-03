@@ -47,7 +47,15 @@ const jobSchema = new mongoose.Schema({
             type : mongoose.Schema.Types.ObjectId,
             ref : 'Application'
         }
-    ]
+    ],
+    expiryDate: {
+        type: Date,
+        default: function() {
+            const defaultDate = new Date();
+            defaultDate.setDate(defaultDate.getDate() + 30);
+            return defaultDate;
+        }
+    }
 },{timestamps:true});
 
 export const Job = mongoose.model("Job",jobSchema)

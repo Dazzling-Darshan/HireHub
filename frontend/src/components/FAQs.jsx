@@ -8,12 +8,12 @@ const FAQs = () => {
 
   const faqs = [
     {
-      question: 'How do I create an account on JobPortal?',
+      question: 'How do I create an account on HireHub?',
       answer: 'Click on the "Sign Up" button on the homepage. Fill in your name, email address, and create a password. You can also sign up using your Google or LinkedIn account for faster registration.'
     },
     {
-      question: 'Is JobPortal free to use?',
-      answer: 'Yes! JobPortal is completely free for job seekers. You can search for jobs, create a profile, and apply to positions without any cost. Employers may have paid options for premium features.'
+      question: 'Is HireHub free to use?',
+      answer: 'Yes! HireHub is completely free for job seekers. You can search for jobs, create a profile, and apply to positions without any cost. Employers may have paid options for premium features.'
     },
     {
       question: 'How do I upload my resume?',
@@ -45,7 +45,7 @@ const FAQs = () => {
     },
     {
       question: 'How do employers contact me?',
-      answer: 'Employers can contact you through the email address associated with your account or via the messaging system on JobPortal. Make sure your contact information is up to date!'
+      answer: 'Employers can contact you through the email address associated with your account or via the messaging system on HireHub. Make sure your contact information is up to date!'
     }
   ]
 
@@ -54,7 +54,7 @@ const FAQs = () => {
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-[#0F172A] mb-3 text-center">Frequently Asked Questions</h1>
-        <p className="text-[#64748B] text-center mb-12">Find answers to the most common questions about JobPortal</p>
+        <p className="text-[#64748B] text-center mb-12">Find answers to the most common questions about HireHub</p>
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (

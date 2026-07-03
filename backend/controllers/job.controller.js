@@ -17,6 +17,7 @@ const postJob = async (req, res) => {
       experience,
       position,
       companyId,
+      expiryDate,
     } = req.body;
 
     const userId = req.id;
@@ -49,6 +50,7 @@ const postJob = async (req, res) => {
       position,
       company: companyId,
       createdBy: userId,
+      ...(expiryDate && { expiryDate: new Date(expiryDate) }),
     });
 
     return res.status(201).json({
@@ -78,6 +80,7 @@ const updateJob = async (req, res) => {
       jobType,
       experience,
       position,
+      expiryDate,
     } = req.body;
 
     const userId = req.id;
@@ -99,6 +102,7 @@ const updateJob = async (req, res) => {
     if (jobType) job.jobType = jobType;
     if (experience) job.experience = experience;
     if (position) job.position = Number(position);
+    if (expiryDate) job.expiryDate = new Date(expiryDate);
 
     await job.save();
 

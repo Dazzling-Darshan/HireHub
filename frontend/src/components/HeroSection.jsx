@@ -25,7 +25,7 @@ const HeroSection = () => {
 
         {/* Badge */}
         <span className="px-5 py-2 mx-auto rounded-full bg-blue-50 text-[#2563EB] font-semibold text-sm border border-blue-100 shadow-sm">
-          🚀 No. 1 Job Hunt Platform
+          🚀 Your Career Journey Starts Here
         </span>
 
         {/* Heading */}
@@ -39,8 +39,7 @@ const HeroSection = () => {
 
         {/* Description */}
         <p className="text-[#64748B] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-          Discover thousands of job opportunities tailored just for you. Start
-          your journey today and land your dream career effortlessly.
+          Connect with thousands of employers and discover opportunities that match your skills. Build your career with HireHub's intelligent job matching platform.
         </p>
 
         {/* Search Bar */}
@@ -64,18 +63,18 @@ const HeroSection = () => {
         {/* Stats row */}
         <div className="flex items-center justify-center gap-8 mt-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#0F172A]">10K+</p>
+            <p className="text-2xl font-bold text-[#0F172A]">50K+</p>
             <p className="text-xs text-[#64748B] mt-0.5">Active Jobs</p>
           </div>
           <div className="w-px h-8 bg-[#E2E8F0]" />
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#0F172A]">500+</p>
+            <p className="text-2xl font-bold text-[#0F172A]">10K+</p>
             <p className="text-xs text-[#64748B] mt-0.5">Companies</p>
           </div>
           <div className="w-px h-8 bg-[#E2E8F0]" />
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#10B981]">95%</p>
-            <p className="text-xs text-[#64748B] mt-0.5">Placement Rate</p>
+            <p className="text-2xl font-bold text-[#10B981]">2M+</p>
+            <p className="text-xs text-[#64748B] mt-0.5">Hired Candidates</p>
           </div>
         </div>
 

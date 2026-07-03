@@ -14,6 +14,7 @@ import useGetAppliedJobs from '@/hooks/useGetAppliedJobs'
 
 const Profile = () => {
     const [appliedPage, setAppliedPage] = useState(1)
+    const [savedPage, setSavedPage] = useState(1)
     useGetAppliedJobs(appliedPage)
     const { user } = useSelector(store => store.auth)
     const { savedJobs } = useSelector(store => store.job)
@@ -126,7 +127,7 @@ const Profile = () => {
                     <div className="p-6">
                         {activeTab === 'applied'
                             ? <AppliedJobTable page={appliedPage} onPageChange={setAppliedPage} />
-                            : <SavedJobsTable />}
+                            : <SavedJobsTable page={savedPage} onPageChange={setSavedPage} />}
                     </div>
                 </div>
 

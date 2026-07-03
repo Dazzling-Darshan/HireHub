@@ -91,6 +91,11 @@ const Job = ({ job }) => {
         <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-[#10B981] font-medium border border-emerald-100">
           {job?.salary} LPA
         </span>
+        {job?.expiryDate && (
+          <span className="text-xs px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 font-medium border border-purple-100">
+            Expires: {new Date(job.expiryDate).toLocaleDateString()}
+          </span>
+        )}
       </div>
 
       {/* Action buttons */}

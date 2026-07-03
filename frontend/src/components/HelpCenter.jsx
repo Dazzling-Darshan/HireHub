@@ -57,7 +57,7 @@ const HelpCenter = () => {
           <HelpCircle className="w-16 h-16 text-[#2563EB] mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-[#0F172A] mb-3">Help Center</h1>
           <p className="text-[#64748B] max-w-2xl mx-auto">
-            Find answers to common questions and learn how to make the most of JobPortal
+            Find answers to common questions and learn how to make the most of HireHub
           </p>
         </div>
 

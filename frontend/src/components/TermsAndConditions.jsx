@@ -13,7 +13,7 @@ const TermsAndConditions = () => {
           <section>
             <h2 className="text-xl font-semibold text-[#0F172A] mb-3">1. Acceptance of Terms</h2>
             <p className="text-sm text-[#64748B] leading-relaxed">
-              By accessing and using JobPortal, you agree to be bound by these Terms & Conditions. If you do not agree with any part of these terms, please do not use our platform.
+              By accessing and using HireHub, you agree to be bound by these Terms & Conditions. If you do not agree with any part of these terms, please do not use our platform.
             </p>
           </section>
 
@@ -45,14 +45,14 @@ const TermsAndConditions = () => {
           <section>
             <h2 className="text-xl font-semibold text-[#0F172A] mb-3">5. Intellectual Property</h2>
             <p className="text-sm text-[#64748B] leading-relaxed">
-              All content on JobPortal, including text, graphics, logos, and software, is the property of JobPortal or its licensors and is protected by copyright laws.
+              All content on HireHub, including text, graphics, logos, and software, is the property of HireHub or its licensors and is protected by copyright laws.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-[#0F172A] mb-3">6. Limitation of Liability</h2>
             <p className="text-sm text-[#64748B] leading-relaxed">
-              JobPortal is provided on an "as is" basis. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform.
+              HireHub is provided on an "as is" basis. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform.
             </p>
           </section>
 

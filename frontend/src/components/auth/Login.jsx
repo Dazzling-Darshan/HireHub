@@ -76,7 +76,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gray-100">
       <Navbar />
 
       <div className="flex items-center justify-center px-4">

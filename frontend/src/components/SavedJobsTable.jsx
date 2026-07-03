@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { useSelector, useDispatch } from 'react-redux'
 import { toggleSaveJob } from '@/redux/jobSlice'
@@ -7,11 +7,10 @@ import { Trash2, ExternalLink, Bookmark } from 'lucide-react'
 import Pagination from './shared/Pagination'
 import { PAGE_LIMITS, paginateArray, getTotalPages } from '@/utils/pagination'
 
-const SavedJobsTable = () => {
+const SavedJobsTable = ({ page, onPageChange }) => {
   const { savedJobs } = useSelector((store) => store.job)
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [page, setPage] = useState(1)
   const limit = PAGE_LIMITS.savedJobs
 
   const jobs = Array.isArray(savedJobs) ? savedJobs : [];
@@ -91,7 +90,7 @@ const SavedJobsTable = () => {
         totalPages={totalPages}
         total={jobs.length}
         limit={limit}
-        onPageChange={setPage}
+        onPageChange={onPageChange}
       />
     </div>
   )

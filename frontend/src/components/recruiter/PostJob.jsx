@@ -38,6 +38,7 @@ const PostJob = () => {
     experience: "",
     position: "",
     companyId: "",
+    expiryDate: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -133,6 +134,7 @@ const PostJob = () => {
       const payload = {
         ...input,
         position: Number(input.position),
+        experience: Number(input.experience),
       };
 
       const res = await axios.post(
@@ -352,6 +354,24 @@ const PostJob = () => {
                     {errors.position}
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[#0F172A]">Expiry Date</Label>
+                <Input
+                  type="date"
+                  name="expiryDate"
+                  value={input.expiryDate}
+                  onChange={changeEventHandler}
+                  min={new Date().toISOString().split('T')[0]}
+                  className={`${errors.expiryDate ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                />
+                {errors.expiryDate && (
+                  <p className="text-sm font-medium text-[#EF4444]">
+                    {errors.expiryDate}
+                  </p>
+                )}
+                <p className="text-xs text-[#64748B]">Leave empty for default (30 days from now)</p>
               </div>
 
               {/* Company Select */}

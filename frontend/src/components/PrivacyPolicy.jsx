@@ -13,7 +13,7 @@ const PrivacyPolicy = () => {
           <section>
             <h2 className="text-xl font-semibold text-[#0F172A] mb-3">1. Introduction</h2>
             <p className="text-sm text-[#64748B] leading-relaxed">
-              Welcome to JobPortal. We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and safeguard your information when you use our job portal platform.
+              Welcome to HireHub. We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and safeguard your information when you use our job portal platform.
             </p>
           </section>
 

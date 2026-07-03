@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from './shared/Navbar';
 import Footer from './Footer';
 import { Badge } from './ui/badge';
@@ -9,6 +9,7 @@ import { APPLICATION_API_ENDPOINT, JOB_API_ENDPOINT } from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 const JobDescription = () => {
     const params = useParams();
@@ -18,6 +19,8 @@ const JobDescription = () => {
     const { singleJob } = useSelector(store => store.job);
 
     const dispatch = useDispatch();
+    const [loading, setLoading] = useState(true);
+    const [applying, setApplying] = useState(false);
 
     const isApplied = singleJob?.applications?.some(
         application => application?.applicant?._id === user?._id
@@ -28,9 +31,11 @@ const JobDescription = () => {
             toast.error("Please login to apply for jobs");
             return;
         }
+        setApplying(true);
         try {
-            const res = await axios.get(
+            const res = await axios.post(
                 `${APPLICATION_API_ENDPOINT}/apply/${jobId}`,
+                {},
                 { withCredentials: true }
             );
 
@@ -47,16 +52,18 @@ const JobDescription = () => {
                 toast.success(res.data.message);
             }
         } catch (error) {
-            console.log(error);
             toast.error(
                 error?.response?.data?.message || "Failed to apply"
             );
+        } finally {
+            setApplying(false);
         }
     };
 
     useEffect(() => {
         const fetchSingleJob = async () => {
             try {
+                setLoading(true);
                 const res = await axios.get(
                     `${JOB_API_ENDPOINT}/get/${jobId}`,
                     { withCredentials: true }
@@ -66,12 +73,26 @@ const JobDescription = () => {
                     dispatch(setSingleJob(res.data.job));
                 }
             } catch (error) {
-                console.log(error);
+                // Error fetching job
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchSingleJob();
     }, [jobId, dispatch]);
+
+    if (loading) {
+        return (
+            <div className="bg-[#F8FAFC] min-h-screen flex items-center justify-center">
+                <Navbar />
+                <div className="flex flex-col items-center justify-center mt-20">
+                    <Loader2 className="h-8 w-8 animate-spin text-[#2563EB]" />
+                    <p className="mt-2 text-[#64748B]">Loading job details...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-[#F8FAFC] min-h-screen">
@@ -109,14 +130,14 @@ const JobDescription = () => {
 
                     <Button
                         onClick={isApplied ? undefined : applyJobHandler}
-                        disabled={isApplied}
+                        disabled={isApplied || applying}
                         className={`rounded-xl px-6 py-2 font-medium transition-all duration-300 ${
                             isApplied
                                 ? 'bg-gray-400 text-white cursor-not-allowed'
                                 : 'bg-[#7209b7] text-white hover:bg-[#5a078f] shadow-md hover:shadow-lg'
                         }`}
                     >
-                        {isApplied ? 'Already Applied' : 'Apply Now'}
+                        {applying ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Applying...</> : isApplied ? 'Already Applied' : 'Apply Now'}
                     </Button>
                 </div>
 
@@ -173,6 +194,15 @@ const JobDescription = () => {
                             {singleJob?.createdAt?.split("T")[0]}
                         </span>
                     </h1>
+
+                    {singleJob?.expiryDate && (
+                        <h1 className="font-semibold text-gray-800">
+                            Expiry Date:
+                            <span className="pl-3 font-normal text-gray-600">
+                                {new Date(singleJob.expiryDate).toLocaleDateString()}
+                            </span>
+                        </h1>
+                    )}
                 </div>
             </div>
             <Footer />
