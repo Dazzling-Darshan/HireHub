@@ -7,10 +7,15 @@ import authRoutes from './routes/user.routes.js';
 import companyRoutes from './routes/company.route.js';
 import jobRoutes from './routes/job.route.js';
 import applicationRoutes from './routes/application.route.js';
+import path from "path";
+
+
 
 dotenv.config();
 
 const app = express();
+
+const _dirname = path.resolve();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -29,6 +34,11 @@ app.use("/api/v1/job",jobRoutes);
 app.use("/api/v1/application",applicationRoutes);
 
 const PORT = process.env.PORT || 3000;
+
+app.use(express.static(path.join(_dirname, "/frontend/dist")));
+app.use((req, res) => {
+  res.sendFile(path.resolve(_dirname, "frontend", "dist", "index.html"));
+});
 
 connectDB()
   .then(() => {
