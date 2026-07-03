@@ -18,12 +18,11 @@ const Footer = () => {
           <div>
             <Link to="/">
               <h1 className="text-2xl font-bold text-gray-800">
-                Job<span className="text-blue-600">Portal</span>
+                Hire<span className="text-blue-600">Hub</span>
               </h1>
             </Link>
             <p className="text-sm text-gray-500 mt-3 leading-relaxed">
-              Find your dream job easily with our modern job portal platform.
-              Explore thousands of opportunities tailored for you.
+              Your gateway to career success. Connect with top employers and discover opportunities that match your skills and aspirations.
             </p>
           </div>
 
@@ -91,7 +90,7 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="border-t border-gray-200 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} JobPortal. All rights reserved.
+            © {new Date().getFullYear()} HireHub. All rights reserved.
           </p>
 
           <div className="flex gap-4 mt-3 md:mt-0 text-sm text-gray-500">
