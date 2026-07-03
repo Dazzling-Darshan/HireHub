@@ -36,7 +36,7 @@ const Navbar = () => {
       <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4">
         <Link to="/">
           <h1 className="text-2xl font-bold text-[#0F172A]">
-            Job<span className="text-[#2563EB]">Portal</span>
+            Hire<span className="text-[#2563EB]">Hub</span>
           </h1>
         </Link>
 
