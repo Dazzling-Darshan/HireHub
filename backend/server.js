@@ -36,7 +36,7 @@ app.use("/api/v1/application",applicationRoutes);
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(_dirname, "/frontend/dist")));
-app.use((req, res) => {
+app.get(/.*/, (req, res) => {
   res.sendFile(path.resolve(_dirname, "frontend", "dist", "index.html"));
 });
 

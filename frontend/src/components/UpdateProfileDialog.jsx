@@ -120,64 +120,64 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         <div>
             <Dialog open={open}>
                 <DialogContent
-                    className="sm:max-w-lg rounded-2xl p-6 shadow-2xl border border-[#E2E8F0]"
+                    className="sm:max-w-lg rounded-3xl p-8 shadow-2xl border border-border bg-card"
                     onInteractOutside={() => setOpen(false)}
                 >
 
                     <DialogHeader>
-                        <DialogTitle className="text-xl font-semibold text-[#0F172A]">
+                        <DialogTitle className="text-2xl font-bold text-foreground">
                             Update Profile
                         </DialogTitle>
                     </DialogHeader>
 
                     <form onSubmit={submitHandler}>
-                        <div className='grid gap-5 py-4'>
+                        <div className='grid gap-6 py-4'>
 
                             <div className='space-y-2'>
-                                <Label htmlFor="name" className="text-[#0F172A]">Full Name <span className="text-xs text-[#64748B]">({input.fullName.length}/100)</span></Label>
+                                <Label htmlFor="name" className="text-foreground font-semibold">Full Name <span className="text-xs text-muted-foreground font-normal">({input.fullName.length}/100)</span></Label>
                                 <Input
                                     id="name"
                                     name="fullName"
                                     value={input.fullName}
                                     onChange={changeEventHandler}
                                     maxLength={100}
-                                    className={`rounded-lg ${errors.fullName ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                                    className={`rounded-xl bg-muted/50 transition-all ${errors.fullName ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-primary/20 focus:border-primary'}`}
                                 />
                                 {errors.fullName && (
-                                    <p className="text-sm font-medium text-[#EF4444]">{errors.fullName}</p>
+                                    <p className="text-sm font-medium text-destructive">{errors.fullName}</p>
                                 )}
                             </div>
 
                             <div className='space-y-2'>
-                                <Label htmlFor="email" className="text-[#0F172A]">Email</Label>
+                                <Label htmlFor="email" className="text-foreground font-semibold">Email</Label>
                                 <Input
                                     id="email"
                                     name="email"
                                     value={input.email}
                                     onChange={changeEventHandler}
-                                    className={`rounded-lg ${errors.email ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                                    className={`rounded-xl bg-muted/50 transition-all ${errors.email ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-primary/20 focus:border-primary'}`}
                                 />
                                 {errors.email && (
-                                    <p className="text-sm font-medium text-[#EF4444]">{errors.email}</p>
+                                    <p className="text-sm font-medium text-destructive">{errors.email}</p>
                                 )}
                             </div>
 
                             <div className='space-y-2'>
-                                <Label htmlFor="number" className="text-[#0F172A]">Phone Number</Label>
+                                <Label htmlFor="number" className="text-foreground font-semibold">Phone Number</Label>
                                 <Input
                                     id="number"
                                     name="phoneNumber"
                                     value={input.phoneNumber}
                                     onChange={changeEventHandler}
-                                    className={`rounded-lg ${errors.phoneNumber ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                                    className={`rounded-xl bg-muted/50 transition-all ${errors.phoneNumber ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-primary/20 focus:border-primary'}`}
                                 />
                                 {errors.phoneNumber && (
-                                    <p className="text-sm font-medium text-[#EF4444]">{errors.phoneNumber}</p>
+                                    <p className="text-sm font-medium text-destructive">{errors.phoneNumber}</p>
                                 )}
                             </div>
 
                             <div className='space-y-2'>
-                                <Label htmlFor="bio" className="text-[#0F172A]">Bio <span className="text-xs text-[#64748B]">({input.bio.length}/500)</span></Label>
+                                <Label htmlFor="bio" className="text-foreground font-semibold">Bio <span className="text-xs text-muted-foreground font-normal">({input.bio.length}/500)</span></Label>
                                 <textarea
                                     id="bio"
                                     name="bio"
@@ -185,57 +185,57 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                     onChange={changeEventHandler}
                                     maxLength={500}
                                     rows={3}
-                                    className={`w-full rounded-md px-3 py-2 border ${errors.bio ? 'border-[#EF4444] focus:ring-2 focus:ring-[#EF4444]/20 focus:border-[#EF4444] outline-none' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] outline-none'} bg-white`}
+                                    className={`w-full rounded-xl px-4 py-3 border bg-muted/50 transition-all ${errors.bio ? 'border-destructive focus:ring-2 focus:ring-destructive/20 focus:border-destructive outline-none' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none'}`}
                                 />
                                 {errors.bio && (
-                                    <p className="text-sm font-medium text-[#EF4444]">{errors.bio}</p>
+                                    <p className="text-sm font-medium text-destructive">{errors.bio}</p>
                                 )}
                             </div>
 
                             <div className='space-y-2'>
-                                <Label htmlFor="skills" className="text-[#0F172A]">Skills <span className="text-xs text-[#64748B]">(comma-separated)</span></Label>
+                                <Label htmlFor="skills" className="text-foreground font-semibold">Skills <span className="text-xs text-muted-foreground font-normal">(comma-separated)</span></Label>
                                 <Input
                                     id="skills"
                                     name="skills"
                                     value={input.skills}
                                     onChange={changeEventHandler}
                                     placeholder="React, Node.js, JavaScript"
-                                    className="rounded-lg border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
+                                    className="rounded-xl bg-muted/50 transition-all border-border focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 />
                             </div>
 
                             {/* File Input (fixed UI) */}
                             <div className='space-y-2'>
-                                <Label htmlFor="file" className="text-[#0F172A]">Resume <span className="text-xs text-[#64748B]">(PDF only, optional)</span></Label>
+                                <Label htmlFor="file" className="text-foreground font-semibold">Resume <span className="text-xs text-muted-foreground font-normal">(PDF only, optional)</span></Label>
                                 <input
                                     id="file"
                                     name="file"
                                     type="file"
                                     accept="application/pdf"
                                     onChange={fileChangeHandler}
-                                    className="text-sm cursor-pointer border border-[#E2E8F0] rounded-lg px-3 py-2 w-full"
+                                    className="text-sm cursor-pointer border border-border rounded-xl px-4 py-2.5 w-full bg-muted/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all"
                                 />
                             </div>
 
                         </div>
 
-                        <DialogFooter className="flex gap-3">
+                        <DialogFooter className="flex gap-4 mt-6">
                             <Button 
                                 variant="outline" 
                                 onClick={() => setOpen(false)} 
                                 type="button"
-                                className="border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                className="border-border hover:bg-muted rounded-xl px-6"
                             >
                                 Cancel
                             </Button>
                             {
                                 loading ? (
-                                    <Button className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-medium rounded-lg transition-all duration-300 shadow-sm">
-                                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all duration-300 shadow-md px-6">
+                                        <Loader2 className='mr-2 h-5 w-5 animate-spin' />
                                         Please wait
                                     </Button>
                                 ) : (
-                                    <Button type="submit" className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-medium rounded-lg transition-all duration-300 shadow-sm">
+                                    <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 px-6">
                                         Update Profile
                                     </Button>
                                 )

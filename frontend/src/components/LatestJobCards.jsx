@@ -7,37 +7,37 @@ const LatestJobCards = ({ job }) => {
 
   return (
     <div
-      className="p-5 rounded-xl bg-white border border-[#E2E8F0] hover:border-[#2563EB] hover:shadow-md transition-all duration-200 cursor-pointer group"
+      className="p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:shadow-xl transition-all duration-300 cursor-pointer group hover:-translate-y-1"
       onClick={() => navigate(`/description/${job?._id}`)}
     >
       {/* Company row */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-4">
         <div>
-          <p className="font-semibold text-sm text-[#0F172A] group-hover:text-[#2563EB] transition-colors duration-200">
+          <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors duration-200">
             {job?.company?.name}
           </p>
-          <div className="flex items-center gap-1 mt-0.5">
-            <MapPin className="w-3 h-3 text-[#64748B]" />
-            <span className="text-xs text-[#64748B]">India</span>
+          <div className="flex items-center gap-1 mt-1">
+            <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground font-medium">India</span>
           </div>
         </div>
-        <span className="text-xs text-[#10B981] font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+        <span className="text-xs text-emerald-600 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
           {job?.salary} LPA
         </span>
       </div>
 
       {/* Job title */}
-      <h3 className="font-bold text-base text-[#0F172A] mb-1">{job?.title}</h3>
-      <p className="text-xs text-[#64748B] leading-relaxed line-clamp-2 mb-3">
+      <h3 className="font-bold text-lg text-foreground mb-2 leading-tight group-hover:text-primary transition-colors">{job?.title}</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-5">
         {job?.description}
       </p>
 
       {/* Tags */}
-      <div className="flex items-center flex-wrap gap-1.5">
-        <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-[#2563EB] border border-blue-100 font-medium">
+      <div className="flex items-center flex-wrap gap-2">
+        <span className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-semibold">
           {job?.position} Positions
         </span>
-        <span className="text-xs px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-100 font-medium">
+        <span className="text-xs px-3 py-1 rounded-full bg-orange-500/10 text-orange-600 border border-orange-500/20 font-semibold">
           {job?.jobType}
         </span>
       </div>

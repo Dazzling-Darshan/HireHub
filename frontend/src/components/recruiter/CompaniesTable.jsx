@@ -22,18 +22,18 @@ const CompaniesTable = ({ page, onPageChange }) => {
 
   return (
     <div>
-      <div className="rounded-2xl border border-[#E2E8F0] bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         <Table>
-          <TableCaption className="py-4 text-[#64748B]">
+          <TableCaption className="py-4 text-muted-foreground">
             A list of your registered companies
           </TableCaption>
 
-          <TableHeader className="bg-[#F8FAFC]">
-            <TableRow>
-              <TableHead className="font-semibold text-[#0F172A]">Logo</TableHead>
-              <TableHead className="font-semibold text-[#0F172A]">Name</TableHead>
-              <TableHead className="font-semibold text-[#0F172A]">Registered Date</TableHead>
-              <TableHead className="text-right font-semibold text-[#0F172A]">
+          <TableHeader className="bg-muted/50">
+            <TableRow className="border-border hover:bg-transparent">
+              <TableHead className="font-bold text-muted-foreground">Logo</TableHead>
+              <TableHead className="font-bold text-muted-foreground">Name</TableHead>
+              <TableHead className="font-bold text-muted-foreground">Registered Date</TableHead>
+              <TableHead className="text-right font-bold text-muted-foreground">
                 Actions
               </TableHead>
             </TableRow>
@@ -41,19 +41,19 @@ const CompaniesTable = ({ page, onPageChange }) => {
 
           <TableBody>
             {!companies || companies.length === 0 ? (
-              <TableRow>
+              <TableRow className="hover:bg-transparent">
                 <TableCell
                   colSpan={4}
-                  className="text-center text-[#64748B] py-12"
+                  className="text-center text-muted-foreground py-12 font-medium"
                 >
                   You haven't registered any company yet
                 </TableCell>
               </TableRow>
             ) : (
               companies.map((company) => (
-                <TableRow key={company._id} className="hover:bg-[#F8FAFC] transition-colors">
+                <TableRow key={company._id} className="hover:bg-muted/30 transition-colors border-border">
                   <TableCell>
-                    <Avatar className="h-11 w-11 border border-[#E2E8F0] rounded-lg">
+                    <Avatar className="h-12 w-12 border border-border rounded-xl shadow-sm">
                       <AvatarImage
                         src={
                           company?.logo ||
@@ -63,26 +63,26 @@ const CompaniesTable = ({ page, onPageChange }) => {
                     </Avatar>
                   </TableCell>
 
-                  <TableCell className="font-medium text-[#0F172A]">
+                  <TableCell className="font-bold text-foreground">
                     {company?.name}
                   </TableCell>
 
-                  <TableCell className="text-[#64748B]">
+                  <TableCell className="text-muted-foreground font-medium">
                     {company?.createdAt?.split("T")[0]}
                   </TableCell>
 
                   <TableCell className="text-right">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <button className="p-2 rounded-lg hover:bg-[#F8FAFC] transition-colors">
-                          <MoreHorizontal className="h-5 w-5 cursor-pointer text-[#64748B] hover:text-[#2563EB]" />
+                        <button className="p-2.5 rounded-xl hover:bg-muted transition-colors border border-transparent hover:border-border">
+                          <MoreHorizontal className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-primary transition-colors" />
                         </button>
                       </PopoverTrigger>
 
-                      <PopoverContent className="w-32 p-1.5 rounded-xl border-[#E2E8F0]">
-                        <div className="flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer hover:bg-[#F8FAFC] hover:text-[#2563EB] transition-colors" onClick={()=> navigate(`/admin/companies/${company._id}`)}>
-                          <Edit2 size={16} />
-                          <span className="text-sm font-medium">Edit Company</span>
+                      <PopoverContent className="w-40 p-2 rounded-xl border-border bg-card shadow-lg">
+                        <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors" onClick={()=> navigate(`/admin/companies/${company._id}`)}>
+                          <Edit2 size={16} className="text-primary" />
+                          <span className="text-sm font-bold">Edit Company</span>
                         </div>
                       </PopoverContent>
                     </Popover>

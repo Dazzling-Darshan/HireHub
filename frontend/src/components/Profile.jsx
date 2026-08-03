@@ -23,23 +23,23 @@ const Profile = () => {
     const isResume = !!user?.profile?.resume
 
     return (
-        <div className="bg-[#F8FAFC] min-h-screen">
+        <div className="bg-background min-h-screen">
             <Navbar />
 
             <div className="max-w-4xl mx-auto px-4 py-8">
                 {/* Profile Card */}
-                <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 mb-6">
+                <div className="bg-card border border-border rounded-2xl shadow-md p-8 mb-8">
                     <div className="flex justify-between items-start flex-wrap gap-4">
                         <div className="flex items-center gap-4">
-                            <Avatar className="h-20 w-20 border-2 border-[#E2E8F0] rounded-xl">
+                            <Avatar className="h-24 w-24 border-4 border-muted rounded-2xl shadow-sm">
                                 <AvatarImage
                                     src={user?.profile?.profilePhoto || "https://www.shutterstock.com/image-vector/circle-line-simple-design-logo-600w-2174926871.jpg"}
                                     className="object-cover"
                                 />
                             </Avatar>
                             <div>
-                                <h1 className="text-lg font-semibold text-[#0F172A]">{user?.fullName}</h1>
-                                <p className="text-sm text-[#64748B] mt-0.5 max-w-sm leading-relaxed">
+                                <h1 className="text-2xl font-bold text-foreground">{user?.fullName}</h1>
+                                <p className="text-sm text-muted-foreground mt-1 max-w-sm leading-relaxed">
                                     {user?.profile?.bio || "No bio added yet"}
                                 </p>
                             </div>
@@ -47,7 +47,7 @@ const Profile = () => {
                         <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center gap-1.5 border-[#E2E8F0] text-[#64748B] hover:border-[#2563EB] hover:text-[#2563EB] hover:bg-blue-50 transition-all"
+                            className="flex items-center gap-2 border-border text-foreground hover:border-primary hover:text-primary hover:bg-primary/10 transition-all rounded-xl shadow-sm"
                             onClick={() => setOpen(true)}
                         >
                             <Pen className="w-3.5 h-3.5" />
@@ -56,68 +56,68 @@ const Profile = () => {
                     </div>
 
                     {/* Contact + Resume row */}
-                    <div className="mt-5 pt-5 border-t border-[#E2E8F0] grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="flex items-center gap-2 text-sm">
-                            <Mail className="w-4 h-4 text-[#64748B]" />
-                            <span className="text-[#64748B]">{user?.email}</span>
+                    <div className="mt-8 pt-6 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div className="flex items-center gap-3 text-sm">
+                            <Mail className="w-5 h-5 text-muted-foreground" />
+                            <span className="text-muted-foreground font-medium">{user?.email}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                            <Contact className="w-4 h-4 text-[#64748B]" />
-                            <span className="text-[#64748B]">{user?.phoneNumber}</span>
+                        <div className="flex items-center gap-3 text-sm">
+                            <Contact className="w-5 h-5 text-muted-foreground" />
+                            <span className="text-muted-foreground font-medium">{user?.phoneNumber}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                            <FileText className="w-4 h-4 text-[#64748B]" />
+                        <div className="flex items-center gap-3 text-sm">
+                            <FileText className="w-5 h-5 text-muted-foreground" />
                             {isResume ? (
                                 <a
                                     target="_blank"
                                     href={user?.profile?.resume}
-                                    className="text-[#2563EB] hover:underline font-medium truncate"
+                                    className="text-primary hover:underline font-bold truncate"
                                 >
                                     {user?.profile?.resumeOriginalName}
                                 </a>
                             ) : (
-                                <span className="text-[#64748B]">No resume uploaded</span>
+                                <span className="text-muted-foreground font-medium">No resume uploaded</span>
                             )}
                         </div>
                     </div>
 
                     {/* Skills */}
-                    <div className="mt-5">
-                        <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wider mb-2">Skills</p>
+                    <div className="mt-8">
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">Skills</p>
                         <div className="flex flex-wrap gap-2">
                             {user?.profile?.skills?.length > 0
                                 ? user.profile.skills.map((item, index) => (
                                     <span
                                         key={index}
-                                        className="text-xs px-3 py-1 rounded-full bg-blue-50 text-[#2563EB] border border-blue-100 font-medium"
+                                        className="text-sm px-4 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-bold shadow-sm"
                                     >
                                         {item}
                                     </span>
                                 ))
-                                : <span className="text-sm text-[#64748B]">No skills added</span>
+                                : <span className="text-sm text-muted-foreground">No skills added</span>
                             }
                         </div>
                     </div>
                 </div>
 
                 {/* Jobs section with tabs */}
-                <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-sm overflow-hidden">
+                <div className="bg-card rounded-2xl border border-border shadow-md overflow-hidden">
                     {/* Tab bar */}
-                    <div className="flex border-b border-[#E2E8F0]">
+                    <div className="flex border-b border-border bg-muted/30">
                         <button
                             onClick={() => setActiveTab('applied')}
-                            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors duration-200 ${activeTab === 'applied' ? 'text-[#2563EB] border-b-2 border-[#2563EB] bg-blue-50/50' : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'}`}
+                            className={`flex-1 px-4 py-4 text-sm font-bold transition-colors duration-200 ${activeTab === 'applied' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
                         >
                             Applied Jobs
                         </button>
                         <button
                             onClick={() => setActiveTab('saved')}
-                            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2 ${activeTab === 'saved' ? 'text-[#2563EB] border-b-2 border-[#2563EB] bg-blue-50/50' : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'}`}
+                            className={`flex-1 px-4 py-4 text-sm font-bold transition-colors duration-200 flex items-center justify-center gap-2 ${activeTab === 'saved' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
                         >
-                            <Bookmark className="w-3.5 h-3.5" />
+                            <Bookmark className="w-4 h-4" />
                             Saved Jobs
                             {Array.isArray(savedJobs) && savedJobs.length > 0 && (
-                                <span className="bg-[#2563EB] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                                <span className="bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm">
                                     {savedJobs.length}
                                 </span>
                             )}

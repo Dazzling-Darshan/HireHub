@@ -110,77 +110,77 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="flex items-center justify-center px-4">
+      <div className="flex items-center justify-center px-4 mt-10">
         <form
           onSubmit={submitHandler}
-          className="w-full max-w-lg bg-white shadow-lg rounded-xl p-8 my-10"
+          className="w-full max-w-lg bg-card shadow-xl rounded-3xl p-8 border border-border animate-in zoom-in-95 duration-500"
         >
-          <h1 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+          <h1 className="text-3xl font-extrabold text-foreground mb-6 text-center">
             Create Account
           </h1>
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <Label>Full Name</Label>
+              <Label className="text-foreground font-semibold">Full Name</Label>
               <Input
                 type="text"
                 name="fullName"
                 value={input.fullName}
                 onChange={changeEventHandler}
-                className={errors.fullName ? 'border-red-500 focus:ring-red-200' : ''}
+                className={`mt-1.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 rounded-xl bg-muted/50 ${errors.fullName ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border'}`}
               />
               {errors.fullName && (
-                <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
+                <p className="text-destructive text-sm mt-1.5 font-medium">{errors.fullName}</p>
               )}
             </div>
 
             <div>
-              <Label>Email</Label>
+              <Label className="text-foreground font-semibold">Email</Label>
               <Input
                 type="email"
                 name="email"
                 value={input.email}
                 onChange={changeEventHandler}
-                className={errors.email ? 'border-red-500 focus:ring-red-200' : ''}
+                className={`mt-1.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 rounded-xl bg-muted/50 ${errors.email ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border'}`}
               />
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                <p className="text-destructive text-sm mt-1.5 font-medium">{errors.email}</p>
               )}
             </div>
 
             <div>
-              <Label>Phone Number</Label>
+              <Label className="text-foreground font-semibold">Phone Number</Label>
               <Input
                 type="text"
                 name="phoneNumber"
                 value={input.phoneNumber}
                 onChange={changeEventHandler}
-                className={errors.phoneNumber ? 'border-red-500 focus:ring-red-200' : ''}
+                className={`mt-1.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 rounded-xl bg-muted/50 ${errors.phoneNumber ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border'}`}
               />
               {errors.phoneNumber && (
-                <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>
+                <p className="text-destructive text-sm mt-1.5 font-medium">{errors.phoneNumber}</p>
               )}
             </div>
 
             <div>
-              <Label>Password</Label>
+              <Label className="text-foreground font-semibold">Password</Label>
               <Input
                 type="password"
                 name="password"
                 value={input.password}
                 onChange={changeEventHandler}
-                className={errors.password ? 'border-red-500 focus:ring-red-200' : ''}
+                className={`mt-1.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 rounded-xl bg-muted/50 ${errors.password ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border'}`}
               />
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                <p className="text-destructive text-sm mt-1.5 font-medium">{errors.password}</p>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row justify-between mt-6 gap-4">
+          <div className="flex flex-col md:flex-row justify-between mt-8 gap-4">
             <RadioGroup className="flex gap-6">
               <div className="flex items-center gap-2">
                 <Input
@@ -189,8 +189,9 @@ const Signup = () => {
                   value="student"
                   checked={input.role === "student"}
                   onChange={changeEventHandler}
+                  className="w-4 h-4 accent-primary cursor-pointer border-border"
                 />
-                <Label>Student</Label>
+                <Label className="cursor-pointer text-foreground font-medium">Student</Label>
               </div>
 
               <div className="flex items-center gap-2">
@@ -200,25 +201,26 @@ const Signup = () => {
                   value="recruiter"
                   checked={input.role === "recruiter"}
                   onChange={changeEventHandler}
+                  className="w-4 h-4 accent-primary cursor-pointer border-border"
                 />
-                <Label>Recruiter</Label>
+                <Label className="cursor-pointer text-foreground font-medium">Recruiter</Label>
               </div>
             </RadioGroup>
           </div>
           {errors.role && (
-            <p className="text-red-500 text-sm mt-2">{errors.role}</p>
+            <p className="text-destructive text-sm mt-2 font-medium">{errors.role}</p>
           )}
           <div className="flex flex-col md:flex-row justify-between mt-4 gap-4">
             {/* File Upload */}
             <div className="flex items-center gap-3 w-full">
-              <Label>Profile</Label>
+              <Label className="text-foreground font-semibold">Profile</Label>
 
               <label className="flex-1 cursor-pointer">
-                <div className="flex items-center justify-between border rounded-md px-3 py-2 bg-white">
-                  <span className="text-sm text-gray-500 truncate">
+                <div className="flex items-center justify-between border border-border rounded-xl px-4 py-2 bg-muted/50 hover:bg-muted transition-colors">
+                  <span className="text-sm text-muted-foreground truncate">
                     {input.file ? input.file.name : "Choose file"}
                   </span>
-                  <span className="text-blue-600 text-sm">Browse</span>
+                  <span className="text-primary font-semibold text-sm">Browse</span>
                 </div>
 
                 <input
@@ -232,15 +234,15 @@ const Signup = () => {
           </div>
 
            {
-            loading? <Button className={'w-full my-4'}> <Loader2 className="mr-2 h-4 w-4 animate-spin"/>Please wait</Button>:
-            <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 transition-all shadow-md">
-            Sign Up
-          </Button>
+            loading ? <Button className={'w-full my-6 rounded-xl py-6 font-bold text-base shadow-md'} disabled> <Loader2 className="mr-2 h-5 w-5 animate-spin"/>Please wait</Button>:
+            <Button className="w-full mt-8 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-md hover:shadow-lg rounded-xl py-6 font-bold text-base hover:-translate-y-0.5">
+              Sign Up
+            </Button>
           }
 
-          <p className="text-center text-sm mt-4">
+          <p className="text-center text-sm mt-5 text-muted-foreground">
             Already have an account?{" "}
-            <Link to="/login" className="text-blue-600">
+            <Link to="/login" className="text-primary font-bold hover:underline transition-all">
               Login
             </Link>
           </p>

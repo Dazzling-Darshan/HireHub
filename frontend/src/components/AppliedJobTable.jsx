@@ -9,24 +9,24 @@ const AppliedJobTable = ({ page, onPageChange }) => {
 
   return (
     <div>
-      <div className="w-full overflow-x-auto rounded-xl border border-gray-100 shadow-xs">
-        <Table className="min-w-full text-sm text-gray-700">
-          <TableCaption className="text-gray-550 py-3">
+      <div className="w-full overflow-x-auto rounded-xl border border-border shadow-sm">
+        <Table className="min-w-full text-sm text-foreground">
+          <TableCaption className="text-muted-foreground py-3">
             A list of your applied jobs
           </TableCaption>
-          <TableHeader className="bg-gray-50/50">
-            <TableRow className="border-b border-gray-100">
-              <TableHead className="font-semibold text-gray-600">Date Applied</TableHead>
-              <TableHead className="font-semibold text-gray-600">Job Role</TableHead>
-              <TableHead className="font-semibold text-gray-600">Company</TableHead>
-              <TableHead className="text-right font-semibold text-gray-600">Status</TableHead>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="border-b border-border hover:bg-transparent">
+              <TableHead className="font-bold text-muted-foreground">Date Applied</TableHead>
+              <TableHead className="font-bold text-muted-foreground">Job Role</TableHead>
+              <TableHead className="font-bold text-muted-foreground">Company</TableHead>
+              <TableHead className="text-right font-bold text-muted-foreground">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {
               !allAppliedJobs || allAppliedJobs.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10 text-gray-400">
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={4} className="text-center py-10 text-muted-foreground font-medium">
                     You haven't applied to any jobs yet.
                   </TableCell>
                 </TableRow>
@@ -41,30 +41,30 @@ const AppliedJobTable = ({ page, onPageChange }) => {
                   return (
                     <TableRow 
                       key={app._id} 
-                      className="hover:bg-gray-50/30 transition border-b border-gray-100 last:border-none"
+                      className="hover:bg-muted/30 transition-colors border-b border-border last:border-none"
                     >
-                      <TableCell className="py-3.5 text-gray-600 font-medium">
+                      <TableCell className="py-4 text-muted-foreground font-medium">
                         {formattedDate}
                       </TableCell>
-                      <TableCell className="py-3.5 font-semibold text-gray-800">
+                      <TableCell className="py-4 font-bold text-foreground">
                         {app.job?.title || "N/A"}
                       </TableCell>
-                      <TableCell className="py-3.5 text-gray-600">
+                      <TableCell className="py-4 text-muted-foreground font-medium">
                         {app.job?.company?.name || "N/A"}
                       </TableCell>
-                      <TableCell className="text-right py-3.5">
+                      <TableCell className="text-right py-4">
                         {app?.status === "accepted" && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-55/10 text-emerald-700 border border-emerald-250">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-600 border border-green-500/20 shadow-sm">
                             Shortlisted
                           </span>
                         )}
                         {app?.status === "rejected" && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-55/10 text-rose-700 border border-rose-250">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-destructive/10 text-destructive border border-destructive/20 shadow-sm">
                             Rejected
                           </span>
                         )}
                         {app?.status === "pending" && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-55/10 text-amber-700 border border-amber-250">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-orange-500/10 text-orange-600 border border-orange-500/20 shadow-sm">
                             Pending
                           </span>
                         )}

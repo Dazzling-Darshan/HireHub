@@ -124,37 +124,37 @@ const CompanySetup = () => {
   }, [singleCompany]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="max-w-4xl mx-auto my-10">
+      <div className="max-w-4xl mx-auto my-10 animate-in zoom-in-95 duration-500">
         <form
           onSubmit={submitHandler}
-          className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-8"
+          className="bg-card border border-border rounded-3xl shadow-xl p-10"
         >
-          <div className="flex items-center gap-4 mb-8 pb-6 border-b border-[#E2E8F0]">
+          <div className="flex items-center gap-6 mb-10 pb-8 border-b border-border">
             <Button
               type="button"
               variant="outline"
-              className="flex items-center gap-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+              className="flex items-center gap-2 border-border hover:bg-muted rounded-xl px-5 transition-all"
               onClick={() => navigate("/admin/companies")}
             >
               <ArrowLeft size={18} />
               Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-[#0F172A]">
+              <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
                 {singleCompany ? "Edit Company" : "Company Setup"}
               </h1>
-              <p className="text-[#64748B] mt-1">Fill in your company details</p>
+              <p className="text-muted-foreground mt-2 font-medium">Fill in your company details</p>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label className="font-medium text-[#0F172A]">
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-3">
+              <Label className="font-bold text-foreground">
                 Company Name
-                <span className="text-sm text-[#64748B] ml-1">
+                <span className="text-xs text-muted-foreground ml-2 font-normal">
                   ({input.name.length}/100)
                 </span>
               </Label>
@@ -164,19 +164,19 @@ const CompanySetup = () => {
                 value={input.name}
                 onChange={changeEventHandler}
                 maxLength={100}
-                className={`h-11 ${errors.name ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.name ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
               />
               {errors.name && (
-                <p className="text-sm font-medium text-[#EF4444]">
+                <p className="text-sm font-bold text-destructive mt-1.5">
                   {errors.name}
                 </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label className="font-medium text-[#0F172A]">
+            <div className="space-y-3">
+              <Label className="font-bold text-foreground">
                 Location
-                <span className="text-sm text-[#64748B] ml-1">
+                <span className="text-xs text-muted-foreground ml-2 font-normal">
                   ({input.location.length}/200)
                 </span>
               </Label>
@@ -186,19 +186,19 @@ const CompanySetup = () => {
                 value={input.location}
                 onChange={changeEventHandler}
                 maxLength={200}
-                className={`h-11 ${errors.location ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.location ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
               />
               {errors.location && (
-                <p className="text-sm font-medium text-[#EF4444]">
+                <p className="text-sm font-bold text-destructive mt-1.5">
                   {errors.location}
                 </p>
               )}
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-                <Label className="font-medium text-[#0F172A]">
+            <div className="space-y-3 md:col-span-2">
+                <Label className="font-bold text-foreground">
                   Description
-                  <span className="text-sm text-[#64748B] ml-1">
+                  <span className="text-xs text-muted-foreground ml-2 font-normal">
                     ({input.description.length}/1000)
                   </span>
                 </Label>
@@ -208,19 +208,19 @@ const CompanySetup = () => {
                   onChange={changeEventHandler}
                   maxLength={1000}
                   rows={4}
-                  className={`w-full rounded-md px-3 py-2 border ${errors.description ? 'border-[#EF4444] focus:ring-2 focus:ring-[#EF4444]/20 focus:border-[#EF4444] outline-none' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] outline-none'} bg-white`}
+                  className={`w-full rounded-xl px-4 py-3 border transition-all ${errors.description ? 'border-destructive focus:ring-2 focus:ring-destructive/20 focus:border-destructive outline-none bg-muted/50' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-muted/50'}`}
                 />
                 {errors.description && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.description}
                   </p>
                 )}
               </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label className="font-medium text-[#0F172A]">
+            <div className="space-y-3 md:col-span-2">
+              <Label className="font-bold text-foreground">
                 Website
-                <span className="text-sm text-[#64748B] ml-1">
+                <span className="text-xs text-muted-foreground ml-2 font-normal">
                   (Optional)
                 </span>
               </Label>
@@ -230,19 +230,19 @@ const CompanySetup = () => {
                 value={input.website}
                 onChange={changeEventHandler}
                 placeholder="https://example.com"
-                className={`h-11 ${errors.website ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.website ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
               />
               {errors.website && (
-                <p className="text-sm font-medium text-[#EF4444]">
+                <p className="text-sm font-bold text-destructive mt-1.5">
                   {errors.website}
                 </p>
               )}
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label className="font-medium text-[#0F172A]">
+            <div className="space-y-3 md:col-span-2">
+              <Label className="font-bold text-foreground">
                 Logo
-                <span className="text-sm text-[#64748B] ml-1">
+                <span className="text-xs text-muted-foreground ml-2 font-normal">
                   (Optional)
                 </span>
               </Label>
@@ -250,28 +250,28 @@ const CompanySetup = () => {
                 type="file"
                 accept="image/*"
                 onChange={changeFileHandler}
-                className="cursor-pointer border-[#E2E8F0]"
+                className="h-14 cursor-pointer border-border rounded-xl px-4 py-3 bg-muted/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all"
               />
             </div>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-[#E2E8F0] flex justify-end gap-3">
+          <div className="mt-10 pt-8 border-t border-border flex justify-end gap-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => navigate("/admin/companies")}
-              className="border-[#E2E8F0] hover:bg-[#F8FAFC]"
+              className="border-border hover:bg-muted rounded-xl px-6"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#2563EB] hover:bg-[#1D4ED8] min-w-[120px] transition-all duration-200 shadow-sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 px-8 min-w-[140px]"
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Updating...
                 </>
               ) : (

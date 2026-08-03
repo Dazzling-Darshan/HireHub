@@ -32,52 +32,52 @@ const Navbar = () => {
   };
 
   return (
-    <div className="bg-white border-b border-[#E2E8F0] sticky top-0 z-50 shadow-sm">
-      <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4">
-        <Link to="/">
-          <h1 className="text-2xl font-bold text-[#0F172A]">
-            Hire<span className="text-[#2563EB]">Hub</span>
+    <div className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm transition-all duration-300">
+      <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4 sm:px-6 lg:px-8">
+        <Link to="/" className="hover:opacity-90 transition-opacity">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">
+            Hire<span className="text-primary">Hub</span>
           </h1>
         </Link>
 
         <div className="flex items-center gap-10">
-          <ul className="flex font-medium items-center gap-6 text-[#64748B] text-sm">
+          <ul className="hidden md:flex font-medium items-center gap-8 text-muted-foreground text-sm">
             {user && user.role === "recruiter" ? (
               <>
                 <li>
-                  <Link to="/" className="hover:text-[#2563EB] transition-colors duration-200">Companies</Link>
+                  <Link to="/" className="hover:text-primary transition-colors duration-200">Companies</Link>
                 </li>
                 <li>
-                  <Link to="/admin/jobs" className="hover:text-[#2563EB] transition-colors duration-200">Jobs</Link>
+                  <Link to="/admin/jobs" className="hover:text-primary transition-colors duration-200">Jobs</Link>
                 </li>
               </>
             ) : (
               <>
                 <li>
-                  <Link to="/" className="hover:text-[#2563EB] transition-colors duration-200">Home</Link>
+                  <Link to="/" className="hover:text-primary transition-colors duration-200">Home</Link>
                 </li>
                 <li>
-                  <Link to="/jobs" className="hover:text-[#2563EB] transition-colors duration-200">Jobs</Link>
+                  <Link to="/jobs" className="hover:text-primary transition-colors duration-200">Jobs</Link>
                 </li>
                 <li>
-                  <Link to="/browse" className="hover:text-[#2563EB] transition-colors duration-200">Browse</Link>
+                  <Link to="/browse" className="hover:text-primary transition-colors duration-200">Browse</Link>
                 </li>
               </>
             )}
           </ul>
 
           {!user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Link to="/login">
                 <Button
                   variant="outline"
-                  className="border-[#E2E8F0] text-[#0F172A] hover:bg-[#F8FAFC] hover:border-[#2563EB] hover:text-[#2563EB] transition-all duration-200"
+                  className="border-border text-foreground hover:bg-muted hover:text-primary transition-all duration-300"
                 >
                   Login
                 </Button>
               </Link>
               <Link to="/signup">
-                <Button className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white transition-all duration-200 shadow-sm">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5">
                   Sign Up
                 </Button>
               </Link>
@@ -85,47 +85,47 @@ const Navbar = () => {
           ) : (
             <Popover>
               <PopoverTrigger asChild>
-                <Avatar className="cursor-pointer ring-2 ring-[#E2E8F0] hover:ring-[#2563EB] transition-all duration-200">
+                <Avatar className="cursor-pointer ring-2 ring-transparent hover:ring-primary/50 transition-all duration-300 shadow-sm">
                   <AvatarImage src={user?.profile?.profilePhoto} />
-                  <AvatarFallback className="bg-[#2563EB] text-white font-semibold">
+                  <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                     {user?.fullName?.[0]?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
               </PopoverTrigger>
 
-              <PopoverContent className="w-80 border-[#E2E8F0] shadow-lg">
-                <div className="flex gap-3 pb-4 border-b border-[#E2E8F0]">
-                  <Avatar>
+              <PopoverContent className="w-80 border-border shadow-xl rounded-xl">
+                <div className="flex gap-4 pb-4 border-b border-border items-center">
+                  <Avatar className="h-12 w-12 shadow-sm">
                     <AvatarImage src={user?.profile?.profilePhoto} />
-                    <AvatarFallback className="bg-[#2563EB] text-white font-semibold">
+                    <AvatarFallback className="bg-primary text-primary-foreground font-bold text-lg">
                       {user?.fullName?.[0]?.toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <h4 className="font-semibold text-[#0F172A]">{user?.fullName}</h4>
-                    <p className="text-xs text-[#64748B] mt-0.5">
+                  <div className="flex flex-col">
+                    <h4 className="font-semibold text-foreground leading-tight">{user?.fullName}</h4>
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
                       {user?.profile?.bio || "No bio added"}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1 mt-3">
+                <div className="flex flex-col gap-2 mt-4">
                   {user && user.role === "student" && (
-                    <div className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-[#F8FAFC] transition cursor-pointer">
-                      <User2 size={16} className="text-[#64748B]" />
-                      <Link to="/profile">
-                        <Button variant="link" className="p-0 h-auto text-[#0F172A] font-medium text-sm">
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted transition-colors cursor-pointer group">
+                      <User2 size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                      <Link to="/profile" className="flex-1">
+                        <Button variant="link" className="p-0 h-auto text-foreground font-medium text-sm group-hover:text-primary transition-colors">
                           View Profile
                         </Button>
                       </Link>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-red-50 transition cursor-pointer">
-                    <LogOut size={16} className="text-[#EF4444]" />
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-destructive/10 transition-colors cursor-pointer group">
+                    <LogOut size={18} className="text-destructive group-hover:text-destructive transition-colors" />
                     <Button
                       variant="link"
                       onClick={logoutHandler}
-                      className="p-0 h-auto text-[#EF4444] font-medium text-sm"
+                      className="p-0 h-auto text-destructive font-medium text-sm group-hover:text-destructive transition-colors flex-1 text-left"
                     >
                       Logout
                     </Button>

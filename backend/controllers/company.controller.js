@@ -135,13 +135,7 @@ const updateCompany = async (req, res) => {
         if (website) updateData.website = website;
         if (location) updateData.location = location;
 
-        if (file) {
-            const fileUri = getDataUri(file);
-            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-            updateData.logo = cloudResponse.secure_url;
-        }
-
-        if (Object.keys(updateData).length === 0) {
+        if (Object.keys(updateData).length === 0 && !file) {
             return res.status(400).json({
                 message: "No data provided to update",
                 success: false
@@ -155,6 +149,12 @@ const updateCompany = async (req, res) => {
                 message: "Company not found",
                 success: false
             });
+        }
+
+        if (file) {
+            const fileUri = getDataUri(file);
+            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+            updateData.logo = cloudResponse.secure_url;
         }
 
         const updatedCompany = await Company.findByIdAndUpdate(

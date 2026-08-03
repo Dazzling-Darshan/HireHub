@@ -159,24 +159,24 @@ const PostJob = () => {
     <>
       <Navbar />
 
-      <div className="min-h-screen bg-[#F8FAFC] py-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-8">
-            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[#E2E8F0]">
+      <div className="min-h-screen bg-background py-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto animate-in zoom-in-95 duration-500">
+          <div className="bg-card rounded-3xl shadow-xl border border-border p-10">
+            <div className="flex items-center gap-6 mb-10 pb-8 border-b border-border">
               <Button
                 type="button"
                 variant="outline"
-                className="flex items-center gap-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                className="flex items-center gap-2 border-border hover:bg-muted rounded-xl px-5 transition-all"
                 onClick={() => navigate("/admin/jobs")}
               >
                 <ArrowLeft size={18} />
                 Back
               </Button>
               <div>
-                <h1 className="text-3xl font-bold text-[#0F172A]">
+                <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
                   Create New Job
                 </h1>
-                <p className="text-[#64748B] mt-1">
+                <p className="text-muted-foreground mt-2 font-medium">
                   Post a new job opening for one of your registered companies.
                 </p>
               </div>
@@ -184,8 +184,8 @@ const PostJob = () => {
 
             {/* No Company Warning */}
             {companies.length === 0 && (
-              <div className="mb-6 rounded-lg border border-[#EF4444]/30 bg-[#EF4444]/5 p-4">
-                <p className="text-sm font-medium text-[#EF4444]">
+              <div className="mb-8 rounded-xl border border-destructive/30 bg-destructive/10 p-5 shadow-sm">
+                <p className="text-sm font-bold text-destructive">
                   Please register a company first before posting a job.
                 </p>
               </div>
@@ -193,12 +193,12 @@ const PostJob = () => {
 
             <form
               onSubmit={submitHandler}
-              className="grid md:grid-cols-2 gap-6"
+              className="grid md:grid-cols-2 gap-8"
             >
-              <div className="space-y-2">
-                <Label className="text-[#0F172A]">
+              <div className="space-y-3">
+                <Label className="font-bold text-foreground">
                   Job Title
-                  <span className="text-sm text-[#64748B] ml-1">
+                  <span className="text-xs text-muted-foreground ml-2 font-normal">
                     ({input.title.length}/100)
                   </span>
                 </Label>
@@ -209,17 +209,17 @@ const PostJob = () => {
                   onChange={changeEventHandler}
                   placeholder="Frontend Developer"
                   maxLength={100}
-                  className={`${errors.title ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                  className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.title ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
                 />
                 {errors.title && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.title}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-[#0F172A]">Salary (LPA)</Label>
+              <div className="space-y-3">
+                <Label className="font-bold text-foreground">Salary (LPA)</Label>
                 <Input
                   type="number"
                   name="salary"
@@ -227,19 +227,19 @@ const PostJob = () => {
                   onChange={changeEventHandler}
                   placeholder="5"
                   step="0.5"
-                  className={`${errors.salary ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                  className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.salary ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
                 />
                 {errors.salary && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.salary}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2 md:col-span-2">
-                <Label className="text-[#0F172A]">
+              <div className="space-y-3 md:col-span-2">
+                <Label className="font-bold text-foreground">
                   Description
-                  <span className="text-sm text-[#64748B] ml-1">
+                  <span className="text-xs text-muted-foreground ml-2 font-normal">
                     ({input.description.length}/3000)
                   </span>
                 </Label>
@@ -250,19 +250,19 @@ const PostJob = () => {
                   placeholder="Enter job description"
                   maxLength={3000}
                   rows={4}
-                  className={`w-full rounded-md px-3 py-2 border ${errors.description ? 'border-[#EF4444] focus:ring-2 focus:ring-[#EF4444]/20 focus:border-[#EF4444] outline-none' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] outline-none'} bg-white`}
+                  className={`w-full rounded-xl px-4 py-3 border transition-all ${errors.description ? 'border-destructive focus:ring-2 focus:ring-destructive/20 focus:border-destructive outline-none bg-muted/50' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-muted/50'}`}
                 />
                 {errors.description && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.description}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2 md:col-span-2">
-                <Label className="text-[#0F172A]">
+              <div className="space-y-3 md:col-span-2">
+                <Label className="font-bold text-foreground">
                   Requirements
-                  <span className="text-sm text-[#64748B] ml-1">
+                  <span className="text-xs text-muted-foreground ml-2 font-normal">
                     ({input.requirements.length}/200)
                   </span>
                 </Label>
@@ -273,19 +273,19 @@ const PostJob = () => {
                   placeholder="React, Node.js, MongoDB"
                   maxLength={200}
                   rows={3}
-                  className={`w-full rounded-md px-3 py-2 border ${errors.requirements ? 'border-[#EF4444] focus:ring-2 focus:ring-[#EF4444]/20 focus:border-[#EF4444] outline-none' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] outline-none'} bg-white`}
+                  className={`w-full rounded-xl px-4 py-3 border transition-all ${errors.requirements ? 'border-destructive focus:ring-2 focus:ring-destructive/20 focus:border-destructive outline-none bg-muted/50' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-muted/50'}`}
                 />
                 {errors.requirements && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.requirements}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-[#0F172A]">
+              <div className="space-y-3">
+                <Label className="font-bold text-foreground">
                   Location
-                  <span className="text-sm text-[#64748B] ml-1">
+                  <span className="text-xs text-muted-foreground ml-2 font-normal">
                     ({input.location.length}/200)
                   </span>
                 </Label>
@@ -296,98 +296,98 @@ const PostJob = () => {
                   onChange={changeEventHandler}
                   placeholder="Ahmedabad"
                   maxLength={200}
-                  className={`${errors.location ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                  className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.location ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
                 />
                 {errors.location && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.location}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-[#0F172A]">Job Type</Label>
+              <div className="space-y-3">
+                <Label className="font-bold text-foreground">Job Type</Label>
                 <Input
                   type="text"
                   name="jobType"
                   value={input.jobType}
                   onChange={changeEventHandler}
                   placeholder="Full Time"
-                  className={`${errors.jobType ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                  className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.jobType ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
                 />
                 {errors.jobType && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.jobType}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-[#0F172A]">Experience Level (Years)</Label>
+              <div className="space-y-3">
+                <Label className="font-bold text-foreground">Experience Level (Years)</Label>
                 <Input
                   type="number"
                   name="experience"
                   value={input.experience}
                   onChange={changeEventHandler}
                   placeholder="2"
-                  className={`${errors.experience ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                  className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.experience ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
                 />
                 {errors.experience && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.experience}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-[#0F172A]">Number of Positions</Label>
+              <div className="space-y-3">
+                <Label className="font-bold text-foreground">Number of Positions</Label>
                 <Input
                   type="number"
                   name="position"
                   value={input.position}
                   onChange={changeEventHandler}
                   placeholder="5"
-                  className={`${errors.position ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                  className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.position ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
                 />
                 {errors.position && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.position}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-[#0F172A]">Expiry Date</Label>
+              <div className="space-y-3">
+                <Label className="font-bold text-foreground">Expiry Date</Label>
                 <Input
                   type="date"
                   name="expiryDate"
                   value={input.expiryDate}
                   onChange={changeEventHandler}
                   min={new Date().toISOString().split('T')[0]}
-                  className={`${errors.expiryDate ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+                  className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.expiryDate ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
                 />
                 {errors.expiryDate && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.expiryDate}
                   </p>
                 )}
-                <p className="text-xs text-[#64748B]">Leave empty for default (30 days from now)</p>
+                <p className="text-xs text-muted-foreground font-medium">Leave empty for default (30 days from now)</p>
               </div>
 
               {/* Company Select */}
-              <div className="md:col-span-2 space-y-2">
-                <Label className="text-[#0F172A]">Select Company</Label>
+              <div className="md:col-span-2 space-y-3">
+                <Label className="font-bold text-foreground">Select Company</Label>
                 <Select
                   onValueChange={selectCompanyHandler}
                   value={input.companyId}
                 >
-                  <SelectTrigger className={`w-full ${errors.companyId ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}>
+                  <SelectTrigger className={`h-14 w-full rounded-xl bg-muted/50 transition-all ${errors.companyId ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}>
                     <SelectValue placeholder="Choose a registered company" />
                   </SelectTrigger>
-                  <SelectContent className="border-[#E2E8F0]">
+                  <SelectContent className="border-border bg-card rounded-xl shadow-lg">
                     <SelectGroup>
                       {companies.map((company) => (
-                        <SelectItem key={company._id} value={company._id}>
+                        <SelectItem key={company._id} value={company._id} className="cursor-pointer hover:bg-muted transition-colors rounded-lg">
                           {company.name}
                         </SelectItem>
                       ))}
@@ -395,26 +395,26 @@ const PostJob = () => {
                   </SelectContent>
                 </Select>
                 {errors.companyId && (
-                  <p className="text-sm font-medium text-[#EF4444]">
+                  <p className="text-sm font-bold text-destructive mt-1.5">
                     {errors.companyId}
                   </p>
                 )}
               </div>
 
               {/* Submit Button */}
-              <div className="md:col-span-2 pt-4 border-t border-[#E2E8F0] flex justify-end gap-3">
+              <div className="md:col-span-2 pt-8 mt-4 border-t border-border flex justify-end gap-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => navigate("/admin/jobs")}
-                  className="border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                  className="border-border hover:bg-muted rounded-xl px-6"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={loading || companies.length === 0}
-                  className="h-11 bg-[#2563EB] hover:bg-[#1D4ED8] transition-all duration-200 shadow-sm"
+                  className="h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 px-8"
                 >
                   {loading ? "Posting Job..." : "Post New Job"}
                 </Button>

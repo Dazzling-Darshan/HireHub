@@ -31,16 +31,16 @@ const CategoryCarousel = () => {
   };
 
   return (
-    <div className="py-10 bg-[#F8FAFC]">
+    <div className="py-12 bg-muted/30">
       <div className="max-w-4xl mx-auto px-4">
-        <h2 className="text-center text-sm font-semibold text-[#64748B] uppercase tracking-widest mb-6">
+        <h2 className="text-center text-sm font-bold text-muted-foreground uppercase tracking-[0.2em] mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
           Browse by Category
         </h2>
         <Carousel
-          className="w-full"
+          className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700"
           opts={{ align: "start", loop: true, dragFree: false }}
         >
-          <CarouselContent className="gap-3">
+          <CarouselContent className="gap-3 py-2">
             {category.map((cat, index) => (
               <CarouselItem
                 key={index}
@@ -49,18 +49,18 @@ const CategoryCarousel = () => {
                 <Button
                   variant="outline"
                   onClick={() => handleCategoryClick(cat)}
-                  className="rounded-full px-5 py-2 text-sm font-medium
-                             border-[#E2E8F0] text-[#0F172A] bg-white
-                             hover:bg-[#2563EB] hover:text-white hover:border-[#2563EB]
-                             transition-all duration-200 shadow-sm whitespace-nowrap"
+                  className="rounded-full px-6 py-5 text-sm font-medium
+                             border-border text-foreground bg-card
+                             hover:bg-primary hover:text-primary-foreground hover:border-primary hover:scale-105
+                             transition-all duration-300 shadow-sm whitespace-nowrap"
                 >
                   {cat}
                 </Button>
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="left-[-40px] border-[#E2E8F0] hover:bg-[#F8FAFC] transition" />
-          <CarouselNext className="right-[-40px] border-[#E2E8F0] hover:bg-[#F8FAFC] transition" />
+          <CarouselPrevious className="hidden md:flex left-[-50px] border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all shadow-sm" />
+          <CarouselNext className="hidden md:flex right-[-50px] border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all shadow-sm" />
         </Carousel>
       </div>
     </div>

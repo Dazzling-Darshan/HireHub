@@ -84,43 +84,43 @@ const JobDescription = () => {
 
     if (loading) {
         return (
-            <div className="bg-[#F8FAFC] min-h-screen flex items-center justify-center">
+            <div className="bg-background min-h-screen flex items-center justify-center">
                 <Navbar />
                 <div className="flex flex-col items-center justify-center mt-20">
-                    <Loader2 className="h-8 w-8 animate-spin text-[#2563EB]" />
-                    <p className="mt-2 text-[#64748B]">Loading job details...</p>
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="mt-2 text-muted-foreground">Loading job details...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-[#F8FAFC] min-h-screen">
+        <div className="bg-background min-h-screen">
             <Navbar />
-            <div className="max-w-5xl mx-auto my-10 px-6 py-8 bg-white shadow-xl rounded-2xl border border-gray-200">
-                <div className="flex items-center justify-between border-b pb-6">
+            <div className="max-w-5xl mx-auto my-10 px-6 py-8 bg-card shadow-xl rounded-3xl border border-border">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border pb-8 gap-4">
                     <div>
-                        <h1 className="font-bold text-2xl text-gray-800">
+                        <h1 className="font-extrabold text-3xl text-foreground">
                             {singleJob?.title}
                         </h1>
 
-                        <div className="flex items-center gap-3 mt-4">
+                        <div className="flex items-center flex-wrap gap-3 mt-4">
                             <Badge
-                                className="text-blue-700 font-semibold bg-blue-50 px-3 py-1 rounded-full"
+                                className="text-primary font-bold bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20"
                                 variant="ghost"
                             >
                                 {singleJob?.position} Positions
                             </Badge>
 
                             <Badge
-                                className="text-[#F83002] font-semibold bg-orange-50 px-3 py-1 rounded-full"
+                                className="text-orange-600 font-bold bg-orange-500/10 px-4 py-1.5 rounded-full border border-orange-500/20"
                                 variant="ghost"
                             >
                                 {singleJob?.jobType}
                             </Badge>
 
                             <Badge
-                                className="text-[#7209b7] font-semibold bg-purple-50 px-3 py-1 rounded-full"
+                                className="text-emerald-600 font-bold bg-emerald-500/10 px-4 py-1.5 rounded-full border border-emerald-500/20"
                                 variant="ghost"
                             >
                                 {singleJob?.salary} LPA
@@ -131,78 +131,63 @@ const JobDescription = () => {
                     <Button
                         onClick={isApplied ? undefined : applyJobHandler}
                         disabled={isApplied || applying}
-                        className={`rounded-xl px-6 py-2 font-medium transition-all duration-300 ${
+                        className={`rounded-2xl px-8 py-6 font-bold text-base transition-all duration-300 w-full md:w-auto shadow-md hover:shadow-lg ${
                             isApplied
-                                ? 'bg-gray-400 text-white cursor-not-allowed'
-                                : 'bg-[#7209b7] text-white hover:bg-[#5a078f] shadow-md hover:shadow-lg'
+                                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                                : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-1'
                         }`}
                     >
-                        {applying ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Applying...</> : isApplied ? 'Already Applied' : 'Apply Now'}
+                        {applying ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Applying...</> : isApplied ? 'Already Applied' : 'Apply Now'}
                     </Button>
                 </div>
 
-                <h1 className="border-b mt-8 text-lg font-semibold text-gray-700 pb-3">
-                    {singleJob?.description}
-                </h1>
+                <div className="border-b border-border mt-8 pb-6">
+                    <h2 className="text-xl font-bold text-foreground mb-4">Job Description</h2>
+                    <p className="text-base text-muted-foreground leading-relaxed">
+                        {singleJob?.description}
+                    </p>
+                </div>
 
-                <div className="my-6 space-y-3 text-sm">
-                    <h1 className="font-semibold text-gray-800">
-                        Role:
-                        <span className="pl-3 font-normal text-gray-600">
-                            {singleJob?.title}
-                        </span>
-                    </h1>
+                <div className="my-8">
+                    <h2 className="text-xl font-bold text-foreground mb-6">Job Details</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-muted/30 p-6 rounded-2xl border border-border">
+                        <div className="flex flex-col gap-1">
+                            <span className="font-semibold text-foreground">Role</span>
+                            <span className="text-muted-foreground">{singleJob?.title}</span>
+                        </div>
 
-                    <h1 className="font-semibold text-gray-800">
-                        Location:
-                        <span className="pl-3 font-normal text-gray-600">
-                            {singleJob?.location}
-                        </span>
-                    </h1>
+                        <div className="flex flex-col gap-1">
+                            <span className="font-semibold text-foreground">Location</span>
+                            <span className="text-muted-foreground">{singleJob?.location}</span>
+                        </div>
 
-                    <h1 className="font-semibold text-gray-800">
-                        Description:
-                        <span className="pl-3 font-normal text-gray-600">
-                            {singleJob?.description}
-                        </span>
-                    </h1>
+                        <div className="flex flex-col gap-1">
+                            <span className="font-semibold text-foreground">Experience</span>
+                            <span className="text-muted-foreground">{singleJob?.experience} yrs</span>
+                        </div>
 
-                    <h1 className="font-semibold text-gray-800">
-                        Experience:
-                        <span className="pl-3 font-normal text-gray-600">
-                            {singleJob?.experience} yrs
-                        </span>
-                    </h1>
+                        <div className="flex flex-col gap-1">
+                            <span className="font-semibold text-foreground">Salary</span>
+                            <span className="text-muted-foreground">{singleJob?.salary} LPA</span>
+                        </div>
 
-                    <h1 className="font-semibold text-gray-800">
-                        Salary:
-                        <span className="pl-3 font-normal text-gray-600">
-                            {singleJob?.salary} LPA
-                        </span>
-                    </h1>
+                        <div className="flex flex-col gap-1">
+                            <span className="font-semibold text-foreground">Total Applicants</span>
+                            <span className="text-muted-foreground">{singleJob?.applications?.length || 0}</span>
+                        </div>
 
-                    <h1 className="font-semibold text-gray-800">
-                        Total Applicants:
-                        <span className="pl-3 font-normal text-gray-600">
-                            {singleJob?.applications?.length || 0}
-                        </span>
-                    </h1>
+                        <div className="flex flex-col gap-1">
+                            <span className="font-semibold text-foreground">Posted Date</span>
+                            <span className="text-muted-foreground">{singleJob?.createdAt?.split("T")[0]}</span>
+                        </div>
 
-                    <h1 className="font-semibold text-gray-800">
-                        Posted Date:
-                        <span className="pl-3 font-normal text-gray-600">
-                            {singleJob?.createdAt?.split("T")[0]}
-                        </span>
-                    </h1>
-
-                    {singleJob?.expiryDate && (
-                        <h1 className="font-semibold text-gray-800">
-                            Expiry Date:
-                            <span className="pl-3 font-normal text-gray-600">
-                                {new Date(singleJob.expiryDate).toLocaleDateString()}
-                            </span>
-                        </h1>
-                    )}
+                        {singleJob?.expiryDate && (
+                            <div className="flex flex-col gap-1">
+                                <span className="font-semibold text-foreground">Expiry Date</span>
+                                <span className="text-muted-foreground">{new Date(singleJob.expiryDate).toLocaleDateString()}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
             <Footer />

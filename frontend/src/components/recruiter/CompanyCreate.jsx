@@ -63,34 +63,34 @@ const CompanyCreate = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="max-w-2xl mx-auto my-10 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-8">
-        <div className="flex items-center gap-4 mb-8 pb-6 border-b border-[#E2E8F0]">
+      <div className="max-w-2xl mx-auto my-10 bg-card border border-border rounded-2xl shadow-xl p-10 animate-in zoom-in-95 duration-500">
+        <div className="flex items-center gap-6 mb-10 pb-8 border-b border-border">
           <Button
             type="button"
             variant="outline"
-            className="flex items-center gap-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+            className="flex items-center gap-2 border-border hover:bg-muted rounded-xl px-5"
             onClick={() => navigate("/admin/companies")}
           >
             <ArrowLeft size={18} />
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-[#0F172A]">
+            <h1 className="text-3xl font-extrabold text-foreground">
               Register New Company
             </h1>
-            <p className="text-[#64748B] mt-1">
+            <p className="text-muted-foreground mt-2 font-medium">
               Let's get your company set up.
             </p>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label className="font-medium text-[#0F172A]">
+        <div className="space-y-3">
+          <Label className="font-bold text-foreground">
             Company Name
-            <span className="text-sm text-[#64748B] ml-1">
+            <span className="text-xs text-muted-foreground ml-2 font-normal">
               ({input.length}/100)
             </span>
           </Label>
@@ -98,29 +98,29 @@ const CompanyCreate = () => {
           <Input
             type="text"
             placeholder="e.g. JobHunt, Microsoft, etc."
-            className={`h-11 ${errors.companyName ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]' : 'border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]'}`}
+            className={`h-14 rounded-xl bg-muted/50 transition-all ${errors.companyName ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'}`}
             value={input}
             onChange={handleInputChange}
             maxLength={100}
           />
           {errors.companyName && (
-            <p className="text-sm font-medium text-[#EF4444] mt-1">
+            <p className="text-sm font-bold text-destructive mt-1.5">
               {errors.companyName}
             </p>
           )}
         </div>
 
-        <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-[#E2E8F0]">
+        <div className="flex justify-end gap-4 mt-10 pt-8 border-t border-border">
           <Button
             variant="outline"
             onClick={() => navigate("/admin/companies")}
-            className="border-[#E2E8F0] hover:bg-[#F8FAFC]"
+            className="border-border hover:bg-muted rounded-xl px-6"
           >
             Cancel
           </Button>
 
           <Button
-            className="bg-[#2563EB] hover:bg-[#1D4ED8] transition-all duration-200 shadow-sm"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 px-8"
             onClick={registerNewCompany}
           >
             Continue to Setup

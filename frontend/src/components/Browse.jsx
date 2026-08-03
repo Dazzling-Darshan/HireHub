@@ -73,39 +73,41 @@ const Browse = () => {
   const totalPages = getTotalPages(filteredJobs.length, limit);
 
   return (
-    <div className="bg-[#F8FAFC] min-h-screen">
+    <div className="bg-background min-h-screen">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex gap-6">
+        <div className="flex gap-8">
           {/* Sidebar with Filters */}
-          <div className="hidden lg:block w-72 flex-shrink-0">
-            <FilterCard onFilterChange={setFilters} />
+          <div className="hidden lg:block w-72 flex-shrink-0 animate-in slide-in-from-left-8 duration-700">
+            <div className="sticky top-24">
+                <FilterCard onFilterChange={setFilters} />
+            </div>
           </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0 animate-in slide-in-from-right-8 duration-700">
             {/* Active search indicator */}
             {searchedQuery && (
-              <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg w-fit">
-                <Search className="w-3.5 h-3.5 text-[#2563EB]" />
-                <span className="text-sm text-[#0F172A]">
-                  Searching for: <span className="font-semibold text-[#2563EB]">"{searchedQuery}"</span>
+              <div className="flex items-center gap-2 mb-6 px-4 py-2.5 bg-primary/10 border border-primary/20 rounded-xl w-fit shadow-sm">
+                <Search className="w-4 h-4 text-primary" />
+                <span className="text-sm text-foreground">
+                  Searching for: <span className="font-bold text-primary">"{searchedQuery}"</span>
                 </span>
                 <button
                   onClick={() => dispatch(setSearchedQuery(""))}
-                  className="ml-1 text-[#64748B] hover:text-[#EF4444] transition"
+                  className="ml-2 text-muted-foreground hover:text-destructive transition-colors p-1 hover:bg-muted rounded-md"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             )}
 
             {/* Heading */}
             <div className="flex items-center justify-between mb-6">
-              <h1 className="font-semibold text-xl text-[#0F172A]">
+              <h1 className="font-bold text-2xl text-foreground">
                 {searchedQuery ? "Search Results" : "Browse All Jobs"}
-                <span className="ml-2 text-sm font-normal text-[#64748B]">
+                <span className="ml-3 text-sm font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                   ({filteredJobs.length} {filteredJobs.length === 1 ? "job" : "jobs"})
                 </span>
               </h1>
@@ -113,12 +115,12 @@ const Browse = () => {
 
             {/* Empty state */}
             {filteredJobs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 text-center">
-                <div className="w-16 h-16 bg-white rounded-full border border-[#E2E8F0] flex items-center justify-center mb-4 shadow-sm">
-                  <Search className="w-7 h-7 text-[#64748B]" />
+              <div className="flex flex-col items-center justify-center py-24 text-center bg-card rounded-2xl border border-border shadow-sm animate-in fade-in duration-500">
+                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-5 shadow-inner">
+                  <Search className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <h2 className="text-base font-semibold text-[#0F172A] mb-2">No jobs found</h2>
-                <p className="text-sm text-[#64748B] max-w-sm">
+                <h2 className="text-xl font-bold text-foreground mb-2">No jobs found</h2>
+                <p className="text-base text-muted-foreground max-w-sm">
                   {searchedQuery
                     ? `No results for "${searchedQuery}". Try a different search.`
                     : "No jobs available yet. Check back soon!"}
@@ -126,17 +128,19 @@ const Browse = () => {
                 {searchedQuery && (
                   <button
                     onClick={() => dispatch(setSearchedQuery(""))}
-                    className="mt-4 px-5 py-2 bg-[#2563EB] text-white rounded-lg text-sm hover:bg-[#1D4ED8] transition font-medium"
+                    className="mt-6 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-all font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5"
                   >
                     Show All Jobs
                   </button>
                 )}
               </div>
             ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {paginatedJobs.map((job) => (
-                    <Job key={job._id} job={job} />
+                    <div key={job._id} className="animate-in fade-in zoom-in-95 duration-500">
+                        <Job job={job} />
+                    </div>
                   ))}
                 </div>
                 <Pagination
@@ -146,7 +150,7 @@ const Browse = () => {
                   limit={limit}
                   onPageChange={setPage}
                 />
-              </>
+              </div>
             )}
           </div>
         </div>

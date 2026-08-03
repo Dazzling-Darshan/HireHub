@@ -31,32 +31,32 @@ const AdminJobs = () => {
   }, [input]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-in fade-in duration-500">
         <div className="mb-8">
-          <p className="text-xs font-semibold text-[#2563EB] uppercase tracking-wider mb-2">
+          <p className="text-sm font-bold text-primary uppercase tracking-wider mb-2">
             Recruiters Portal
           </p>
-          <h2 className="text-3xl font-bold text-[#0F172A]">
+          <h2 className="text-4xl font-extrabold text-foreground tracking-tight">
             Jobs Management
           </h2>
-          <p className="text-[#64748B] mt-2 text-sm">
+          <p className="text-muted-foreground mt-2 text-base">
             Manage your posted jobs, view applicants, and create new openings.
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
           <Input
-            className="max-w-sm bg-white border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
+            className="max-w-sm bg-muted/50 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all rounded-xl"
             placeholder="Search jobs by title or role..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
 
           <Button
-            className="bg-[#2563EB] hover:bg-[#1D4ED8] transition-all duration-200 shadow-sm"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-md hover:shadow-lg rounded-xl font-bold hover:-translate-y-0.5"
             onClick={() => navigate("/admin/jobs/create")}
           >
             + New Job

@@ -170,19 +170,19 @@ const updateProfile = async (req, res) => {
     const { fullName, email, phoneNumber, bio, skills } = req.body;
 
     const userId = req.id; // from auth middleware
-    let cloudResponse = null;
-
-    if (req.file) {
-      const fileUri = getDataUri(req.file);
-      cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-    }
-
     let user = await User.findById(userId);
     if (!user) {
       return res.status(400).json({
         message: "User not found",
         success: false,
       });
+    }
+
+    let cloudResponse = null;
+
+    if (req.file) {
+      const fileUri = getDataUri(req.file);
+      cloudResponse = await cloudinary.uploader.upload(fileUri.content);
     }
 
     if (!user.profile) {

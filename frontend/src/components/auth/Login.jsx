@@ -76,51 +76,51 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="flex items-center justify-center px-4">
+      <div className="flex items-center justify-center px-4 mt-10">
         <form
           onSubmit={submitHandler}
-          className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 my-10 border border-gray-100"
+          className="w-full max-w-md bg-card shadow-xl rounded-3xl p-8 border border-border animate-in zoom-in-95 duration-500"
         >
-          <h1 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+          <h1 className="text-3xl font-extrabold text-foreground mb-6 text-center">
             Welcome Back
           </h1>
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <Label>Email</Label>
+              <Label className="text-foreground font-semibold">Email</Label>
               <Input
                 type="email"
                 placeholder="darshan@gmail.com"
                 value={input.email}
                 name="email"
                 onChange={changeEventHandler}
-                className={`mt-1 focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500 focus:ring-red-200' : ''}`}
+                className={`mt-1.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 rounded-xl bg-muted/50 ${errors.email ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border'}`}
               />
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                <p className="text-destructive text-sm mt-1.5 font-medium">{errors.email}</p>
               )}
             </div>
 
             <div>
-              <Label>Password</Label>
+              <Label className="text-foreground font-semibold">Password</Label>
               <Input
                 type="password"
                 placeholder="********"
                 value={input.password}
                 name="password"
                 onChange={changeEventHandler}
-                className={`mt-1 focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500 focus:ring-red-200' : ''}`}
+                className={`mt-1.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 rounded-xl bg-muted/50 ${errors.password ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : 'border-border'}`}
               />
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                <p className="text-destructive text-sm mt-1.5 font-medium">{errors.password}</p>
               )}
             </div>
           </div>
 
-          <RadioGroup className="flex gap-6 mt-5">
+          <RadioGroup className="flex gap-6 mt-6">
             <div className="flex items-center gap-2">
               <Input
                 type="radio"
@@ -128,8 +128,9 @@ const Login = () => {
                 value="student"
                 checked={input.role === "student"}
                 onChange={changeEventHandler}
+                className="w-4 h-4 accent-primary cursor-pointer border-border"
               />
-              <Label>Student</Label>
+              <Label className="cursor-pointer text-foreground font-medium">Student</Label>
             </div>
 
             <div className="flex items-center gap-2">
@@ -139,22 +140,24 @@ const Login = () => {
                 value="recruiter"
                 checked={input.role === "recruiter"}
                 onChange={changeEventHandler}
+                className="w-4 h-4 accent-primary cursor-pointer border-border"
               />
-              <Label>Recruiter</Label>
+              <Label className="cursor-pointer text-foreground font-medium">Recruiter</Label>
             </div>
           </RadioGroup>
           {errors.role && (
-            <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+            <p className="text-destructive text-sm mt-1.5 font-medium">{errors.role}</p>
           )}
+
           {
-            loading? <Button className={'w-full my-4'}> <Loader2 className="mr-2 h-4 w-4 animate-spin"/>Please wait</Button>:
-            <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 transition-all shadow-md">
-            Login
-          </Button>
+            loading ? <Button className={'w-full my-6 rounded-xl py-6 font-bold text-base shadow-md'} disabled> <Loader2 className="mr-2 h-5 w-5 animate-spin"/>Please wait</Button>:
+            <Button className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-md hover:shadow-lg rounded-xl py-6 font-bold text-base hover:-translate-y-0.5">
+              Login
+            </Button>
           }
-          <p className="text-center text-sm text-gray-600 mt-4">
+          <p className="text-center text-sm text-muted-foreground mt-5">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-blue-600 hover:underline">
+            <Link to="/signup" className="text-primary font-bold hover:underline transition-all">
               Sign Up
             </Link>
           </p>

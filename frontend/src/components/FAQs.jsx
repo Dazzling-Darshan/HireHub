@@ -50,28 +50,28 @@ const FAQs = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold text-[#0F172A] mb-3 text-center">Frequently Asked Questions</h1>
-        <p className="text-[#64748B] text-center mb-12">Find answers to the most common questions about HireHub</p>
+      <div className="max-w-4xl mx-auto px-4 py-16 animate-in fade-in duration-500">
+        <h1 className="text-4xl font-extrabold text-foreground mb-3 text-center tracking-tight">Frequently Asked Questions</h1>
+        <p className="text-muted-foreground text-center mb-12 font-medium text-lg">Find answers to the most common questions about HireHub</p>
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <div key={index} className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden">
+            <div key={index} className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
               <button 
-                className="w-full px-6 py-4 flex justify-between items-center text-left hover:bg-gray-50 transition"
+                className="w-full px-8 py-5 flex justify-between items-center text-left hover:bg-muted/50 transition-colors cursor-pointer border-none bg-transparent"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
               >
-                <span className="font-medium text-[#0F172A]">{faq.question}</span>
+                <span className="font-bold text-foreground text-lg">{faq.question}</span>
                 {openIndex === index ? (
-                  <ChevronUp className="w-5 h-5 text-[#2563EB]" />
+                  <ChevronUp className="w-5 h-5 text-primary flex-shrink-0 ml-4" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-[#64748B]" />
+                  <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-4" />
                 )}
               </button>
               {openIndex === index && (
-                <div className="px-6 pb-4 text-sm text-[#64748B] leading-relaxed">
+                <div className="px-8 pb-6 text-base text-muted-foreground leading-relaxed font-medium animate-in slide-in-from-top-2 duration-200">
                   {faq.answer}
                 </div>
               )}
@@ -79,9 +79,9 @@ const FAQs = () => {
           ))}
         </div>
 
-        <div className="mt-12 text-center">
-          <p className="text-[#64748B] mb-4">Still have questions?</p>
-          <a href="/contact" className="inline-block bg-[#2563EB] text-white font-medium px-6 py-3 rounded-lg hover:bg-[#1D4ED8] transition">
+        <div className="mt-16 text-center bg-primary/5 rounded-3xl p-10 border border-primary/10">
+          <p className="text-muted-foreground mb-6 font-bold text-lg">Still have questions?</p>
+          <a href="/contact" className="inline-block bg-primary text-primary-foreground font-bold px-8 py-4 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5">
             Contact Us
           </a>
         </div>

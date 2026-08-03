@@ -35,85 +35,85 @@ const Job = ({ job }) => {
   const daysAgo = daysAgoFunction(job?.createdAt);
 
   return (
-    <div className="p-5 rounded-xl bg-white border border-[#E2E8F0] hover:border-[#2563EB] hover:shadow-md transition-all duration-200 group">
+    <div className="p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
 
       {/* Top row */}
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xs text-[#64748B] font-medium">
+        <span className="text-xs text-muted-foreground font-medium">
           {daysAgo === 0 ? "Posted today" : `${daysAgo}d ago`}
         </span>
         <button
           onClick={handleSaveToggle}
-          className={`p-1.5 rounded-lg transition-all duration-200 ${
+          className={`p-1.5 rounded-full transition-all duration-300 ${
             isSaved
-              ? "bg-blue-50 text-[#2563EB]"
-              : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#2563EB]"
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-muted hover:text-primary"
           }`}
           title={isSaved ? "Remove from saved" : "Save for later"}
         >
           {isSaved ? (
-            <BookmarkCheck className="w-4 h-4" />
+            <BookmarkCheck className="w-5 h-5" />
           ) : (
-            <Bookmark className="w-4 h-4" />
+            <Bookmark className="w-5 h-5" />
           )}
         </button>
       </div>
 
       {/* Company */}
       <div className="flex items-center gap-3 mb-4">
-        <Avatar className="w-10 h-10 border border-[#E2E8F0] rounded-lg shrink-0">
+        <Avatar className="w-12 h-12 border border-border rounded-xl shrink-0 shadow-sm">
           <AvatarImage src={job?.company?.logo} className="object-contain" />
         </Avatar>
         <div>
-          <p className="font-semibold text-[#0F172A] text-sm leading-tight">{job?.company?.name}</p>
-          <p className="text-xs text-[#64748B]">India</p>
+          <p className="font-semibold text-foreground text-base leading-tight group-hover:text-primary transition-colors">{job?.company?.name}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 font-medium">India</p>
         </div>
       </div>
 
       {/* Job title & description */}
-      <div className="mb-4">
-        <h3 className="font-semibold text-base text-[#0F172A] mb-1 group-hover:text-[#2563EB] transition-colors duration-200">
+      <div className="mb-5">
+        <h3 className="font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
           {job?.title}
         </h3>
-        <p className="text-xs text-[#64748B] leading-relaxed line-clamp-2">
+        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
           {job?.description}
         </p>
       </div>
 
       {/* Badges */}
-      <div className="flex items-center flex-wrap gap-1.5 mb-4">
-        <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-[#2563EB] font-medium border border-blue-100">
+      <div className="flex items-center flex-wrap gap-2 mb-5">
+        <span className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20">
           {job?.position} Positions
         </span>
-        <span className="text-xs px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 font-medium border border-orange-100">
+        <span className="text-xs px-3 py-1 rounded-full bg-orange-500/10 text-orange-600 font-semibold border border-orange-500/20">
           {job?.jobType}
         </span>
-        <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-[#10B981] font-medium border border-emerald-100">
+        <span className="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 font-semibold border border-emerald-500/20">
           {job?.salary} LPA
         </span>
         {job?.expiryDate && (
-          <span className="text-xs px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 font-medium border border-purple-100">
+          <span className="text-xs px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 font-semibold border border-purple-500/20">
             Expires: {new Date(job.expiryDate).toLocaleDateString()}
           </span>
         )}
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-2 pt-3 border-t border-[#E2E8F0]">
+      <div className="flex gap-3 pt-4 border-t border-border">
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 text-xs border-[#E2E8F0] text-[#0F172A] hover:bg-[#F8FAFC] hover:border-[#2563EB] hover:text-[#2563EB] transition-all duration-200"
+          className="flex-1 text-xs border-border text-foreground hover:bg-muted hover:text-primary transition-all duration-300 rounded-lg"
           onClick={() => navigate(`/description/${job._id}`)}
         >
           View Details
         </Button>
         <Button
           size="sm"
-          className={`flex-1 text-xs transition-all duration-200 ${
+          className={`flex-1 text-xs transition-all duration-300 rounded-lg ${
             isSaved
-              ? "bg-blue-50 text-[#2563EB] border border-blue-200 hover:bg-blue-100"
-              : "bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm"
+              ? "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
+              : "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg"
           }`}
           onClick={handleSaveToggle}
         >

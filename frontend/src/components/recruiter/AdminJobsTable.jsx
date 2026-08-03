@@ -28,27 +28,27 @@ const AdminJobsTable = ({ page, onPageChange }) => {
 
   return (
     <div>
-      <div className="rounded-2xl border border-[#E2E8F0] bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         <Table>
-          <TableCaption className="py-4 text-[#64748B]">
+          <TableCaption className="py-4 text-muted-foreground">
             A list of your posted jobs
           </TableCaption>
 
-          <TableHeader className="bg-[#F8FAFC]">
-            <TableRow>
-              <TableHead className="font-semibold text-[#0F172A]">Company Name</TableHead>
-              <TableHead className="font-semibold text-[#0F172A]">Role</TableHead>
-              <TableHead className="font-semibold text-[#0F172A]">Posted Date</TableHead>
-              <TableHead className="text-right font-semibold text-[#0F172A]">Actions</TableHead>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="border-border hover:bg-transparent">
+              <TableHead className="font-bold text-muted-foreground">Company Name</TableHead>
+              <TableHead className="font-bold text-muted-foreground">Role</TableHead>
+              <TableHead className="font-bold text-muted-foreground">Posted Date</TableHead>
+              <TableHead className="text-right font-bold text-muted-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {!allAdminJobs || allAdminJobs.length === 0 ? (
-              <TableRow>
+              <TableRow className="hover:bg-transparent">
                 <TableCell
                   colSpan={4}
-                  className="text-center py-12 text-[#64748B]"
+                  className="text-center py-12 text-muted-foreground font-medium"
                 >
                   No jobs posted yet
                 </TableCell>
@@ -57,54 +57,54 @@ const AdminJobsTable = ({ page, onPageChange }) => {
               allAdminJobs.map((job) => (
                 <TableRow
                   key={job._id}
-                  className="hover:bg-[#F8FAFC] transition-colors"
+                  className="hover:bg-muted/30 transition-colors border-border"
                 >
-                  <TableCell className="font-medium text-[#0F172A]">
+                  <TableCell className="font-bold text-foreground">
                     {job?.company?.name || "N/A"}
                   </TableCell>
 
-                  <TableCell className="text-[#0F172A]">
+                  <TableCell className="font-medium text-foreground">
                     {job?.title || "N/A"}
                   </TableCell>
 
-                  <TableCell className="text-[#64748B]">
+                  <TableCell className="text-muted-foreground font-medium">
                     {job?.createdAt?.split("T")[0] || "N/A"}
                   </TableCell>
 
                   <TableCell className="text-right">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <button className="p-2 rounded-lg hover:bg-[#F8FAFC] transition-colors">
-                          <MoreHorizontal className="h-5 w-5 text-[#64748B] hover:text-[#2563EB]" />
+                        <button className="p-2.5 rounded-xl hover:bg-muted transition-colors border border-transparent hover:border-border">
+                          <MoreHorizontal className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
                         </button>
                       </PopoverTrigger>
 
                       <PopoverContent
-                        className="w-48 p-1.5 rounded-xl border-[#E2E8F0]"
+                        className="w-48 p-2 rounded-xl border-border bg-card shadow-lg"
                         align="end"
                       >
                         <div
-                          className="flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer transition-all duration-200 hover:bg-[#F8FAFC] hover:text-[#2563EB]"
+                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-pointer transition-colors hover:bg-primary/10 hover:text-primary"
                           onClick={() =>
                             navigate(`/admin/jobs/${job._id}`)
                           }
                         >
-                          <Edit2 size={16} />
-                          <span className="text-sm font-medium">
+                          <Edit2 size={16} className="text-primary" />
+                          <span className="text-sm font-bold">
                             Edit Job
                           </span>
                         </div>
 
                         <div
-                          className="mt-1 flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer transition-all duration-200 hover:bg-blue-50 hover:text-[#2563EB]"
+                          className="mt-1 flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-pointer transition-colors hover:bg-primary/10 hover:text-primary"
                           onClick={() =>
                             navigate(
                               `/admin/jobs/${job._id}/applicants`
                             )
                           }
                         >
-                          <Eye size={16} />
-                          <span className="text-sm font-medium">
+                          <Eye size={16} className="text-primary" />
+                          <span className="text-sm font-bold">
                             View Applicants
                           </span>
                         </div>

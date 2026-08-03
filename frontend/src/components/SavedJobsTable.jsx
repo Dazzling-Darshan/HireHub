@@ -19,64 +19,64 @@ const SavedJobsTable = ({ page, onPageChange }) => {
 
   if (jobs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-14 h-14 bg-[#F8FAFC] rounded-full border border-[#E2E8F0] flex items-center justify-center mb-4">
-          <Bookmark className="w-6 h-6 text-[#64748B]" />
+      <div className="flex flex-col items-center justify-center py-16 text-center bg-card rounded-2xl border border-border shadow-sm">
+        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-5 shadow-inner">
+          <Bookmark className="w-7 h-7 text-muted-foreground" />
         </div>
-        <p className="font-medium text-[#0F172A] mb-1">No saved jobs yet</p>
-        <p className="text-sm text-[#64748B]">Browse jobs and click "Save for Later" to see them here.</p>
+        <p className="text-lg font-bold text-foreground mb-2">No saved jobs yet</p>
+        <p className="text-base text-muted-foreground">Browse jobs and click "Save for Later" to see them here.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="w-full overflow-x-auto rounded-lg border border-[#E2E8F0]">
+      <div className="w-full overflow-x-auto rounded-xl border border-border shadow-sm">
         <Table className="min-w-full text-sm">
-          <TableHeader className="bg-[#F8FAFC]">
-            <TableRow className="border-b border-[#E2E8F0]">
-              <TableHead className="font-semibold text-[#64748B] text-xs uppercase tracking-wide py-3">Job Role</TableHead>
-              <TableHead className="font-semibold text-[#64748B] text-xs uppercase tracking-wide py-3">Company</TableHead>
-              <TableHead className="font-semibold text-[#64748B] text-xs uppercase tracking-wide py-3">Location</TableHead>
-              <TableHead className="font-semibold text-[#64748B] text-xs uppercase tracking-wide py-3">Type</TableHead>
-              <TableHead className="font-semibold text-[#64748B] text-xs uppercase tracking-wide py-3">Salary</TableHead>
-              <TableHead className="text-right font-semibold text-[#64748B] text-xs uppercase tracking-wide py-3">Actions</TableHead>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="border-b border-border hover:bg-transparent">
+              <TableHead className="font-bold text-muted-foreground text-xs uppercase tracking-wide py-4">Job Role</TableHead>
+              <TableHead className="font-bold text-muted-foreground text-xs uppercase tracking-wide py-4">Company</TableHead>
+              <TableHead className="font-bold text-muted-foreground text-xs uppercase tracking-wide py-4">Location</TableHead>
+              <TableHead className="font-bold text-muted-foreground text-xs uppercase tracking-wide py-4">Type</TableHead>
+              <TableHead className="font-bold text-muted-foreground text-xs uppercase tracking-wide py-4">Salary</TableHead>
+              <TableHead className="text-right font-bold text-muted-foreground text-xs uppercase tracking-wide py-4">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedJobs.map((job) => (
               <TableRow
                 key={job._id}
-                className="border-b border-[#E2E8F0] last:border-none hover:bg-[#F8FAFC] transition-colors duration-150"
+                className="border-b border-border last:border-none hover:bg-muted/30 transition-colors duration-200"
               >
-                <TableCell className="py-3.5 font-semibold text-[#0F172A]">{job?.title || 'N/A'}</TableCell>
-                <TableCell className="py-3.5 text-[#64748B]">{job?.company?.name || 'N/A'}</TableCell>
-                <TableCell className="py-3.5 text-[#64748B]">{job?.location || 'N/A'}</TableCell>
-                <TableCell className="py-3.5">
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-100 font-medium">
+                <TableCell className="py-4 font-bold text-foreground">{job?.title || 'N/A'}</TableCell>
+                <TableCell className="py-4 text-muted-foreground font-medium">{job?.company?.name || 'N/A'}</TableCell>
+                <TableCell className="py-4 text-muted-foreground font-medium">{job?.location || 'N/A'}</TableCell>
+                <TableCell className="py-4">
+                  <span className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-bold shadow-sm">
                     {job?.jobType || 'N/A'}
                   </span>
                 </TableCell>
-                <TableCell className="py-3.5">
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-[#10B981] border border-emerald-100 font-medium">
+                <TableCell className="py-4">
+                  <span className="text-xs px-3 py-1 rounded-full bg-green-500/10 text-green-600 border border-green-500/20 font-bold shadow-sm">
                     {job?.salary} LPA
                   </span>
                 </TableCell>
-                <TableCell className="text-right py-3.5">
-                  <div className="flex items-center justify-end gap-2">
+                <TableCell className="text-right py-4">
+                  <div className="flex items-center justify-end gap-3">
                     <button
-                      className="p-1.5 rounded-lg border border-[#E2E8F0] text-[#64748B] hover:border-[#2563EB] hover:text-[#2563EB] hover:bg-blue-50 transition-all duration-150"
+                      className="p-2 rounded-xl border border-border text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/10 transition-all duration-200 shadow-sm"
                       onClick={() => navigate(`/description/${job._id}`)}
                       title="View job"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
+                      <ExternalLink className="w-4 h-4" />
                     </button>
                     <button
-                      className="p-1.5 rounded-lg border border-[#E2E8F0] text-[#64748B] hover:border-[#EF4444] hover:text-[#EF4444] hover:bg-red-50 transition-all duration-150"
+                      className="p-2 rounded-xl border border-border text-muted-foreground hover:border-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 shadow-sm"
                       onClick={() => dispatch(toggleSaveJob(job))}
                       title="Remove"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </TableCell>
