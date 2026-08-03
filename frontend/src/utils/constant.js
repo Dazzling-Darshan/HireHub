@@ -1,4 +1,6 @@
-export const USER_API_ENDPOINT="https://job-portal-8j14.onrender.com/api/v1/user";
-export const JOB_API_ENDPOINT="https://job-portal-8j14.onrender.com/api/v1/job";
-export const APPLICATION_API_ENDPOINT="https://job-portal-8j14.onrender.com/api/v1/application";
-export const COMPANY_API_ENDPOINT="https://job-portal-8j14.onrender.com/api/v1/company";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api/v1";
+
+export const USER_API_ENDPOINT = `${BASE_URL}/user`;
+export const JOB_API_ENDPOINT = `${BASE_URL}/job`;
+export const APPLICATION_API_ENDPOINT = `${BASE_URL}/application`;
+export const COMPANY_API_ENDPOINT = `${BASE_URL}/company`;

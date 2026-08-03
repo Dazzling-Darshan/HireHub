@@ -126,7 +126,7 @@ const loginUser = async (req, res) => {
       .cookie("token", token, {
         maxAge: 1 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "lax",
       })
       .json({
         message: `Welcome back ${user.fullName}`,
@@ -150,7 +150,7 @@ const logoutUser = async (req, res) => {
       .cookie("token", "", {
         maxAge: 0,
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "lax",
       })
       .json({
         message: "Logged out successfully",
