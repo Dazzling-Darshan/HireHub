@@ -3,7 +3,7 @@ import Navbar from './shared/Navbar'
 import Footer from './Footer'
 import { Avatar, AvatarImage } from './ui/avatar'
 import { Button } from './ui/button'
-import { Contact, Mail, Pen, Bookmark, FileText } from 'lucide-react'
+import { Contact, Mail, Pen, Bookmark, FileText, ArrowLeft } from 'lucide-react'
 import { Badge } from './ui/badge'
 import { Label } from './ui/label'
 import AppliedJobTable from './AppliedJobTable'
@@ -11,8 +11,10 @@ import SavedJobsTable from './SavedJobsTable'
 import UpdateProfileDialog from './UpdateProfileDialog'
 import { useSelector } from 'react-redux'
 import useGetAppliedJobs from '@/hooks/useGetAppliedJobs'
+import { useNavigate } from 'react-router-dom'
 
 const Profile = () => {
+    const navigate = useNavigate()
     const [appliedPage, setAppliedPage] = useState(1)
     const [savedPage, setSavedPage] = useState(1)
     useGetAppliedJobs(appliedPage)
@@ -27,6 +29,17 @@ const Profile = () => {
             <Navbar />
 
             <div className="max-w-4xl mx-auto px-4 py-8">
+                {/* Back button */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center gap-2 mb-6 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors group cursor-pointer"
+                >
+                    <div className="p-2 rounded-xl bg-card border border-border group-hover:border-primary/50 group-hover:bg-muted transition-all shadow-sm">
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                    </div>
+                    <span>Back</span>
+                </button>
+
                 {/* Profile Card */}
                 <div className="bg-card border border-border rounded-2xl shadow-md p-8 mb-8">
                     <div className="flex justify-between items-start flex-wrap gap-4">

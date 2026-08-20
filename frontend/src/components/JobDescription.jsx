@@ -9,7 +9,7 @@ import { APPLICATION_API_ENDPOINT, JOB_API_ENDPOINT } from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import { Loader2, Sparkles, CheckCircle2, CircleDashed, Share2, Copy, Check, MapPin, Calendar, User as UserIcon } from 'lucide-react';
+import { Loader2, Sparkles, CheckCircle2, CircleDashed, Share2, Copy, Check, MapPin, Calendar, User as UserIcon, ArrowLeft } from 'lucide-react';
 import { formatSalary } from './LatestJobCards';
 import { calculateSkillMatch } from '@/utils/skillMatcher';
 
@@ -27,7 +27,9 @@ const JobDescription = () => {
     const [hasAppliedLocal, setHasAppliedLocal] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    const isAppliedInJob = !!user && singleJob?.applications?.some(
+    const isCurrentJobLoaded = singleJob && singleJob._id === jobId;
+
+    const isAppliedInJob = !!user && isCurrentJobLoaded && singleJob?.applications?.some(
         application => application?.applicant?._id === user?._id || application?.applicant === user?._id
     );
     const isAppliedInRedux = !!user && Array.isArray(allAppliedJobs) && allAppliedJobs.some(
@@ -35,7 +37,7 @@ const JobDescription = () => {
     );
     const isApplied = !!user && (isAppliedInJob || isAppliedInRedux || hasAppliedLocal);
 
-    const skillMatch = user?.role === 'student'
+    const skillMatch = user?.role === 'student' && isCurrentJobLoaded
         ? calculateSkillMatch(user, singleJob?.requirements, singleJob)
         : null;
 
@@ -90,7 +92,7 @@ const JobDescription = () => {
     };
 
     const shareUrl = encodeURIComponent(window.location.href);
-    const shareText = encodeURIComponent(`Check out this exciting opening: ${singleJob?.title} at ${singleJob?.company?.name}`);
+    const shareText = encodeURIComponent(`Check out this exciting opening: ${singleJob?.title || 'Job Opening'} at ${singleJob?.company?.name || 'Company'}`);
 
     useEffect(() => {
         const fetchSingleJob = async () => {
@@ -114,14 +116,33 @@ const JobDescription = () => {
         fetchSingleJob();
     }, [jobId, dispatch]);
 
-    if (loading) {
+    if (loading || !isCurrentJobLoaded) {
         return (
-            <div className="bg-background min-h-screen flex items-center justify-center">
+            <div className="bg-background min-h-screen">
                 <Navbar />
-                <div className="flex flex-col items-center justify-center mt-20">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="mt-2 text-muted-foreground">Loading job details...</p>
+                <div className="max-w-5xl mx-auto my-10 px-4 sm:px-6">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="inline-flex items-center gap-2 mb-6 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors group"
+                    >
+                        <div className="p-2 rounded-xl bg-card border border-border group-hover:border-primary/50 group-hover:bg-muted transition-all shadow-sm">
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                        </div>
+                        <span>Back</span>
+                    </button>
+                    <div className="bg-card shadow-xl rounded-3xl border border-border p-6 sm:p-10 animate-pulse space-y-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-2xl bg-muted" />
+                            <div className="space-y-2 flex-1">
+                                <div className="h-6 w-1/3 bg-muted rounded-lg" />
+                                <div className="h-4 w-1/4 bg-muted rounded-lg" />
+                            </div>
+                        </div>
+                        <div className="h-24 bg-muted rounded-2xl" />
+                        <div className="h-32 bg-muted rounded-2xl" />
+                    </div>
                 </div>
+                <Footer />
             </div>
         );
     }
@@ -131,8 +152,19 @@ const JobDescription = () => {
             <Navbar />
             <div className="max-w-5xl mx-auto my-10 px-4 sm:px-6">
                 
+                {/* Back button */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center gap-2 mb-6 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors group cursor-pointer"
+                >
+                    <div className="p-2 rounded-xl bg-card border border-border group-hover:border-primary/50 group-hover:bg-muted transition-all shadow-sm">
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                    </div>
+                    <span>Back to Jobs</span>
+                </button>
+
                 {/* Main Card */}
-                <div className="bg-card shadow-xl rounded-3xl border border-border p-6 sm:p-10 mb-8">
+                <div className="bg-card shadow-xl rounded-3xl border border-border p-6 sm:p-10 mb-8 animate-in fade-in duration-300">
                     
                     {/* Header */}
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border pb-8 gap-6">
