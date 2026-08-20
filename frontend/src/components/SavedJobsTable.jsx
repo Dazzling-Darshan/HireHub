@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { Trash2, ExternalLink, Bookmark } from 'lucide-react'
 import Pagination from './shared/Pagination'
 import { PAGE_LIMITS, paginateArray, getTotalPages } from '@/utils/pagination'
+import { formatSalary } from './LatestJobCards'
 
 const SavedJobsTable = ({ page, onPageChange }) => {
   const { savedJobs } = useSelector((store) => store.job)
@@ -59,7 +60,7 @@ const SavedJobsTable = ({ page, onPageChange }) => {
                 </TableCell>
                 <TableCell className="py-4">
                   <span className="text-xs px-3 py-1 rounded-full bg-green-500/10 text-green-600 border border-green-500/20 font-bold shadow-sm">
-                    {job?.salary} LPA
+                    {formatSalary(job?.salary)}
                   </span>
                 </TableCell>
                 <TableCell className="text-right py-4">

@@ -2,9 +2,12 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
+import compression from 'compression';
 import connectDB from './utils/db.js';
 import './utils/redis.js';
 import { isCacheAvailable } from './utils/redis.js';
+import { apiLimiter } from './middlewares/rateLimiter.js';
 import authRoutes from './routes/user.routes.js';
 import companyRoutes from './routes/company.route.js';
 import jobRoutes from './routes/job.route.js';
@@ -17,6 +20,9 @@ const app = express();
 
 const _dirname = path.resolve();
 
+// Security and performance middlewares
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -27,6 +33,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use("/api/v1", apiLimiter);
 
 // Health check endpoint
 app.get("/api/v1/health", (req, res) => {

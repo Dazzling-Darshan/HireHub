@@ -144,24 +144,47 @@ const updateJob = async (req, res) => {
 const getAllJobs = async (req, res) => {
   try {
     const keyword = req.query.keyword || "";
+    const location = req.query.location || "";
+    const jobType = req.query.jobType || "";
+    const minSalary = req.query.minSalary ? Number(req.query.minSalary) : null;
+    const maxSalary = req.query.maxSalary ? Number(req.query.maxSalary) : null;
+    const experience = req.query.experience ? Number(req.query.experience) : null;
     const hasPagination =
       req.query.page !== undefined || req.query.limit !== undefined;
     const { page, limit, skip } = getPaginationParams(req, 9);
 
-    const cacheKey = `jobs:all:${keyword}:${hasPagination ? `${page}:${limit}` : "all"}`;
+    const cacheKey = `jobs:all:${keyword}:${location}:${jobType}:${minSalary || 0}-${maxSalary || "max"}:${experience || "any"}:${hasPagination ? `${page}:${limit}` : "all"}`;
     const cachedData = await getCache(cacheKey);
     if (cachedData) {
       return res.status(200).json(cachedData);
     }
 
-    const query = keyword
-      ? {
-          $or: [
-            { title: { $regex: keyword, $options: "i" } },
-            { description: { $regex: keyword, $options: "i" } },
-          ],
-        }
-      : {};
+    const query = {};
+
+    if (keyword) {
+      query.$or = [
+        { title: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ];
+    }
+
+    if (location) {
+      query.location = { $regex: location, $options: "i" };
+    }
+
+    if (jobType) {
+      query.jobType = { $regex: jobType, $options: "i" };
+    }
+
+    if (experience !== null && !isNaN(experience)) {
+      query.experience = { $lte: experience };
+    }
+
+    if ((minSalary !== null && !isNaN(minSalary)) || (maxSalary !== null && !isNaN(maxSalary))) {
+      query.salary = {};
+      if (minSalary !== null && !isNaN(minSalary)) query.salary.$gte = minSalary;
+      if (maxSalary !== null && !isNaN(maxSalary)) query.salary.$lte = maxSalary;
+    }
 
     if (!hasPagination) {
       const jobs = await Job.find(query)

@@ -139,6 +139,50 @@ const Jobs = () => {
               )}
             </div>
 
+            {/* Active Filter Chips Bar */}
+            {(totalActiveFilters > 0 || searchText) && (
+              <div className="flex items-center flex-wrap gap-2 mb-6 animate-in fade-in duration-300">
+                {searchText && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                    Keyword: "{searchText}"
+                    <button onClick={() => setSearchText("")} className="hover:text-destructive transition-colors">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </span>
+                )}
+                {Object.entries(activeFilters).map(([key, values]) =>
+                  values.map((val) => (
+                    <span
+                      key={`${key}-${val}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-muted text-foreground border border-border hover:border-destructive/40 transition-all"
+                    >
+                      {val} {key === 'salary' ? 'LPA' : ''}
+                      <button
+                        onClick={() => {
+                          setActiveFilters((prev) => ({
+                            ...prev,
+                            [key]: prev[key].filter((v) => v !== val),
+                          }));
+                        }}
+                        className="text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ))
+                )}
+                <button
+                  onClick={() => {
+                    setSearchText("");
+                    setActiveFilters({ location: [], title: [], jobType: [], salary: [] });
+                  }}
+                  className="text-xs font-semibold text-destructive hover:underline ml-2"
+                >
+                  Clear All
+                </button>
+              </div>
+            )}
+
             {/* Desktop results count */}
             <div className="hidden lg:flex items-center justify-between mb-6">
               <p className="text-sm text-muted-foreground">
