@@ -3,40 +3,53 @@ import Navbar from './shared/Navbar';
 import Footer from './Footer';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { APPLICATION_API_ENDPOINT, JOB_API_ENDPOINT } from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import { Loader2, Sparkles, CheckCircle2, CircleDashed, Share2, Copy, Check } from 'lucide-react';
+import { Loader2, Sparkles, CheckCircle2, CircleDashed, Share2, Copy, Check, MapPin, Calendar, User as UserIcon } from 'lucide-react';
 import { formatSalary } from './LatestJobCards';
 import { calculateSkillMatch } from '@/utils/skillMatcher';
 
 const JobDescription = () => {
     const params = useParams();
+    const navigate = useNavigate();
     const jobId = params.id;
 
     const { user } = useSelector(store => store.auth);
-    const { singleJob } = useSelector(store => store.job);
+    const { singleJob, allAppliedJobs } = useSelector(store => store.job);
 
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(true);
     const [applying, setApplying] = useState(false);
+    const [hasAppliedLocal, setHasAppliedLocal] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    const userApplication = singleJob?.applications?.find(
+    const isAppliedInJob = !!user && singleJob?.applications?.some(
         application => application?.applicant?._id === user?._id || application?.applicant === user?._id
     );
-    const isApplied = !!userApplication;
+    const isAppliedInRedux = !!user && Array.isArray(allAppliedJobs) && allAppliedJobs.some(
+        app => (app?.job?._id === jobId || app?.job === jobId)
+    );
+    const isApplied = !!user && (isAppliedInJob || isAppliedInRedux || hasAppliedLocal);
 
     const skillMatch = user?.role === 'student'
-        ? calculateSkillMatch(user?.profile?.skills, singleJob?.requirements)
+        ? calculateSkillMatch(user, singleJob?.requirements, singleJob)
         : null;
+
+    const formatDeadline = (dateStr) => {
+        if (!dateStr) return "Open until filled";
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return "Open until filled";
+        return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    };
 
     const applyJobHandler = async () => {
         if (!user) {
             toast.error("Please login to apply for jobs");
+            navigate("/login");
             return;
         }
         setApplying(true);
@@ -48,6 +61,7 @@ const JobDescription = () => {
             );
 
             if (res.data.success) {
+                setHasAppliedLocal(true);
                 const updatedJob = await axios.get(
                     `${JOB_API_ENDPOINT}/get/${jobId}`,
                     { withCredentials: true }
@@ -76,7 +90,7 @@ const JobDescription = () => {
     };
 
     const shareUrl = encodeURIComponent(window.location.href);
-    const shareText = encodeURIComponent(`Check out this role: ${singleJob?.title} at ${singleJob?.company?.name}`);
+    const shareText = encodeURIComponent(`Check out this exciting opening: ${singleJob?.title} at ${singleJob?.company?.name}`);
 
     useEffect(() => {
         const fetchSingleJob = async () => {
@@ -140,16 +154,21 @@ const JobDescription = () => {
                                 <h1 className="font-extrabold text-2xl sm:text-3xl text-foreground leading-tight">
                                     {singleJob?.title}
                                 </h1>
-                                <p className="text-muted-foreground font-semibold text-base mt-1">
-                                    {singleJob?.company?.name} · <span className="font-normal">{singleJob?.location}</span>
-                                </p>
+                                <div className="flex items-center gap-2 text-muted-foreground font-semibold text-base mt-1 flex-wrap">
+                                    <span>{singleJob?.company?.name}</span>
+                                    <span>·</span>
+                                    <span className="flex items-center gap-1 font-normal">
+                                        <MapPin className="w-4 h-4 text-primary shrink-0" />
+                                        {singleJob?.location || "India"}
+                                    </span>
+                                </div>
 
                                 <div className="flex items-center flex-wrap gap-2.5 mt-4">
                                     <Badge
                                         className="text-primary font-bold bg-primary/10 px-3.5 py-1 rounded-full border border-primary/20 text-xs"
                                         variant="ghost"
                                     >
-                                        {singleJob?.position || 1} Position{Number(singleJob?.position) > 1 ? "s" : ""}
+                                        {singleJob?.position || 1} Openings
                                     </Badge>
 
                                     <Badge
@@ -165,6 +184,16 @@ const JobDescription = () => {
                                     >
                                         {formatSalary(singleJob?.salary)}
                                     </Badge>
+
+                                    {singleJob?.expiryDate && (
+                                        <Badge
+                                            className="text-amber-600 dark:text-amber-400 font-semibold bg-amber-500/10 px-3.5 py-1 rounded-full border border-amber-500/20 text-xs flex items-center gap-1"
+                                            variant="ghost"
+                                        >
+                                            <Calendar className="w-3 h-3" />
+                                            Last Date: {formatDeadline(singleJob.expiryDate)}
+                                        </Badge>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -173,13 +202,19 @@ const JobDescription = () => {
                             <Button
                                 onClick={isApplied ? undefined : applyJobHandler}
                                 disabled={isApplied || applying}
-                                className={`rounded-2xl px-8 py-6 font-bold text-base transition-all duration-300 shadow-md hover:shadow-lg ${
+                                className={`rounded-2xl px-8 py-6 font-bold text-base transition-all duration-300 shadow-md ${
                                     isApplied
-                                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                                        : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-1'
+                                        ? 'bg-muted text-muted-foreground border border-border cursor-not-allowed hover:bg-muted opacity-90'
+                                        : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-1 hover:shadow-lg'
                                 }`}
                             >
-                                {applying ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Applying...</> : isApplied ? '✓ Applied' : 'Apply Now'}
+                                {applying ? (
+                                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Submitting...</>
+                                ) : isApplied ? (
+                                    '✓ Applied'
+                                ) : (
+                                    'Apply Now'
+                                )}
                             </Button>
                         </div>
                     </div>
@@ -269,7 +304,7 @@ const JobDescription = () => {
 
                     {/* Job Details Grid */}
                     <div className="pt-8">
-                        <h2 className="text-xl font-bold text-foreground mb-6">Job Overview</h2>
+                        <h2 className="text-xl font-bold text-foreground mb-6">Job Overview & Details</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 bg-muted/30 p-6 rounded-2xl border border-border">
                             <div className="flex flex-col gap-1">
                                 <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Role</span>
@@ -278,17 +313,36 @@ const JobDescription = () => {
 
                             <div className="flex flex-col gap-1">
                                 <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Location</span>
-                                <span className="font-bold text-foreground">{singleJob?.location}</span>
+                                <span className="font-bold text-foreground flex items-center gap-1">
+                                    <MapPin className="w-3.5 h-3.5 text-primary" />
+                                    {singleJob?.location}
+                                </span>
                             </div>
 
                             <div className="flex flex-col gap-1">
-                                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Experience</span>
+                                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Experience Required</span>
                                 <span className="font-bold text-foreground">{singleJob?.experience === 0 ? "Fresher / Entry" : `${singleJob?.experience}+ Years`}</span>
                             </div>
 
                             <div className="flex flex-col gap-1">
                                 <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Compensation</span>
                                 <span className="font-bold text-emerald-600">{formatSalary(singleJob?.salary)}</span>
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Recruiter / Posted By</span>
+                                <span className="font-bold text-foreground flex items-center gap-1">
+                                    <UserIcon className="w-3.5 h-3.5 text-primary" />
+                                    {singleJob?.createdBy?.fullName || "Verified Recruiter"}
+                                </span>
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Last Date to Apply</span>
+                                <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    {formatDeadline(singleJob?.expiryDate)}
+                                </span>
                             </div>
 
                             <div className="flex flex-col gap-1">
@@ -303,43 +357,50 @@ const JobDescription = () => {
                         </div>
                     </div>
 
-                    {/* Social Share Bar */}
+                    {/* Social Share Bar with Brand Colored Buttons */}
                     <div className="mt-8 pt-6 border-t border-border flex items-center justify-between flex-wrap gap-4">
                         <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                            <Share2 className="w-4 h-4" />
+                            <Share2 className="w-4 h-4 text-primary" />
                             <span>Share this opening:</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center flex-wrap gap-2.5">
+                            {/* WhatsApp: Brand Green */}
                             <a
                                 href={`https://api.whatsapp.com/send?text=${shareText}%20${shareUrl}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-emerald-500/10 hover:text-emerald-600 hover:border-emerald-500/30 transition-all"
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#25D366] text-white hover:bg-[#20bd5a] transition-all shadow-sm hover:shadow-md"
                             >
-                                WhatsApp
+                                <span>WhatsApp</span>
                             </a>
+
+                            {/* LinkedIn: Brand Blue */}
                             <a
                                 href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/30 transition-all"
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#0A66C2] text-white hover:bg-[#084e96] transition-all shadow-sm hover:shadow-md"
                             >
-                                LinkedIn
+                                <span>LinkedIn</span>
                             </a>
+
+                            {/* X: Brand Black */}
                             <a
                                 href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-sky-500/10 hover:text-sky-600 hover:border-sky-500/30 transition-all"
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-black text-white hover:bg-neutral-800 transition-all shadow-sm hover:shadow-md"
                             >
-                                X (Twitter)
+                                <span>X (Twitter)</span>
                             </a>
+
+                            {/* Copy Link: Primary */}
                             <button
                                 onClick={handleCopyLink}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all"
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-xs font-bold bg-card text-foreground hover:bg-muted transition-all shadow-sm hover:shadow-md"
                             >
                                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                                {copied ? "Copied" : "Copy Link"}
+                                {copied ? "Copied Link" : "Copy Link"}
                             </button>
                         </div>
                     </div>

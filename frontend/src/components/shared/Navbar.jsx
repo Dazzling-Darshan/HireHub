@@ -9,6 +9,9 @@ import { USER_API_ENDPOINT } from "@/utils/constant";
 import axios from "axios";
 import { toast } from "sonner";
 import { setUser } from "@/redux/authSlice";
+import { clearUserJobData } from "@/redux/jobSlice";
+import { setCompanies } from "@/redux/companySlice";
+import { setApplicants } from "@/redux/applicationSlice";
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
@@ -22,12 +25,24 @@ const Navbar = () => {
       });
       if (res.data.success) {
         dispatch(setUser(null));
-        toast.success(res.data.message);
+        dispatch(clearUserJobData());
+        dispatch(setCompanies([]));
+        dispatch(setApplicants(null));
+        try {
+          localStorage.removeItem("persist:root");
+        } catch (e) {
+          // ignore
+        }
+        toast.success(res.data.message || "Logged out successfully");
         navigate("/");
       }
     } catch (error) {
       console.error(error);
-      toast.error(error?.response?.data?.message || "Logout failed");
+      // Even if network fails, reset client session
+      dispatch(setUser(null));
+      dispatch(clearUserJobData());
+      toast.error(error?.response?.data?.message || "Logged out");
+      navigate("/");
     }
   };
 

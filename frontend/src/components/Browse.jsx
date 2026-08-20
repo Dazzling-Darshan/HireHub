@@ -10,6 +10,37 @@ import { PAGE_LIMITS, paginateArray, getTotalPages } from '@/utils/pagination'
 import { setSearchedQuery } from '@/redux/jobSlice'
 import { Search, X } from 'lucide-react'
 
+const fuzzyMatchJob = (job, query) => {
+  if (!query || !query.trim()) return true;
+  const q = query.toLowerCase().trim();
+  const searchTokens = q.split(/\s+/).filter(Boolean);
+  if (searchTokens.length === 0) return true;
+
+  const targetText = `${job?.title || ''} ${job?.description || ''} ${job?.company?.name || ''} ${job?.location || ''} ${(job?.requirements || []).join(' ')} ${job?.jobType || ''}`.toLowerCase();
+
+  // Direct substring match
+  if (targetText.includes(q)) return true;
+
+  // 70-80% Token overlap match
+  let matchedTokens = 0;
+  searchTokens.forEach((token) => {
+    if (targetText.includes(token)) {
+      matchedTokens++;
+    } else {
+      const words = targetText.split(/\s+/);
+      const partialFound = words.some((word) => {
+        if (word.length >= 4 && token.length >= 4) {
+          return word.includes(token) || token.includes(word);
+        }
+        return false;
+      });
+      if (partialFound) matchedTokens += 0.8;
+    }
+  });
+
+  return (matchedTokens / searchTokens.length) >= 0.7;
+};
+
 const Browse = () => {
   useGetAllJobs();
   const { allJobs, searchedQuery } = useSelector(store => store.job);
@@ -21,6 +52,7 @@ const Browse = () => {
     location: [],
     title: [],
     jobType: [],
+    experience: [],
     salary: []
   });
 
@@ -29,39 +61,49 @@ const Browse = () => {
   }, [searchedQuery, filters]);
 
   useEffect(() => {
-    let result = allJobs;
+    let result = [...allJobs];
 
-    // Apply search query
+    // Apply 70-80% fuzzy search query
     if (searchedQuery && searchedQuery.trim() !== "") {
-      const query = searchedQuery.toLowerCase();
-      result = result.filter((job) =>
-        job?.title?.toLowerCase().includes(query) ||
-        job?.description?.toLowerCase().includes(query) ||
-        job?.location?.toLowerCase().includes(query) ||
-        job?.company?.name?.toLowerCase().includes(query)
-      );
+      result = result.filter((job) => fuzzyMatchJob(job, searchedQuery));
     }
 
     // Apply filters
-    if (filters.location.length > 0) {
-      result = result.filter(job => filters.location.includes(job?.location));
+    if (filters.location && filters.location.length > 0) {
+      result = result.filter(job =>
+        filters.location.some(loc =>
+          job?.location?.toLowerCase().includes(loc.toLowerCase()) ||
+          loc.toLowerCase().includes(job?.location?.toLowerCase())
+        )
+      );
     }
-    if (filters.title.length > 0) {
+    if (filters.title && filters.title.length > 0) {
       result = result.filter(job => filters.title.some(title => job?.title?.toLowerCase().includes(title.toLowerCase())));
     }
-    if (filters.jobType.length > 0) {
-      result = result.filter(job => filters.jobType.includes(job?.jobType));
+    if (filters.jobType && filters.jobType.length > 0) {
+      result = result.filter(job => filters.jobType.some(jt => job?.jobType?.toLowerCase().includes(jt.toLowerCase())));
     }
-    if (filters.salary.length > 0) {
+    if (filters.experience && filters.experience.length > 0) {
+      result = result.filter((job) => {
+        const exp = Number(job?.experience) || 0;
+        return filters.experience.some((expRange) => {
+          if (expRange.includes('Fresher')) return exp === 0;
+          if (expRange.includes('1-2')) return exp >= 1 && exp <= 2;
+          if (expRange.includes('3-4')) return exp >= 3 && exp <= 4;
+          if (expRange.includes('5+')) return exp >= 5;
+          return true;
+        });
+      });
+    }
+    if (filters.salary && filters.salary.length > 0) {
       result = result.filter(job => {
         const salary = Number(job?.salary) || 0;
         return filters.salary.some(range => {
-          if (range === "0-5") return salary >= 0 && salary <= 5;
-          if (range === "6-10") return salary >= 6 && salary <= 10;
+          if (range === "0-10") return salary >= 0 && salary <= 10;
           if (range === "11-20") return salary >= 11 && salary <= 20;
-          if (range === "21-40") return salary >= 21 && salary <= 40;
-          if (range === "40+") return salary >= 40;
-          return false;
+          if (range === "21-30") return salary >= 21 && salary <= 30;
+          if (range === "30+" || range === "40+") return salary >= 30;
+          return true;
         });
       });
     }

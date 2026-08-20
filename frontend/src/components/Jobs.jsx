@@ -11,16 +11,47 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 
 const parseSalaryRange = (rangeStr) => {
   if (!rangeStr) return { min: 0, max: Infinity };
-  if (rangeStr === "40+") return { min: 40, max: Infinity };
+  if (rangeStr === "30+" || rangeStr === "40+") return { min: 30, max: Infinity };
   const parts = rangeStr.split("-").map(Number);
   return { min: parts[0] || 0, max: parts[1] ?? Infinity };
+};
+
+const fuzzyMatchJob = (job, query) => {
+  if (!query || !query.trim()) return true;
+  const q = query.toLowerCase().trim();
+  const searchTokens = q.split(/\s+/).filter(Boolean);
+  if (searchTokens.length === 0) return true;
+
+  const targetText = `${job?.title || ''} ${job?.description || ''} ${job?.company?.name || ''} ${job?.location || ''} ${(job?.requirements || []).join(' ')} ${job?.jobType || ''}`.toLowerCase();
+
+  // Direct substring match
+  if (targetText.includes(q)) return true;
+
+  // 70-80% Token overlap match
+  let matchedTokens = 0;
+  searchTokens.forEach((token) => {
+    if (targetText.includes(token)) {
+      matchedTokens++;
+    } else {
+      const words = targetText.split(/\s+/);
+      const partialFound = words.some((word) => {
+        if (word.length >= 4 && token.length >= 4) {
+          return word.includes(token) || token.includes(word);
+        }
+        return false;
+      });
+      if (partialFound) matchedTokens += 0.8;
+    }
+  });
+
+  return (matchedTokens / searchTokens.length) >= 0.7;
 };
 
 const Jobs = () => {
   useGetAllJobs();
   const { allJobs } = useSelector((store) => store.job);
   const [activeFilters, setActiveFilters] = useState({
-    location: [], title: [], jobType: [], salary: [],
+    location: [], title: [], jobType: [], experience: [], salary: [],
   });
   const [searchText, setSearchText] = useState("");
   const [filteredJobs, setFilteredJobs] = useState([]);
@@ -35,36 +66,50 @@ const Jobs = () => {
   useEffect(() => {
     let result = [...allJobs];
 
+    // 70-80% Case-insensitive fuzzy search
     if (searchText.trim()) {
-      const q = searchText.toLowerCase();
-      result = result.filter((job) =>
-        job?.title?.toLowerCase().includes(q) ||
-        job?.description?.toLowerCase().includes(q) ||
-        job?.company?.name?.toLowerCase().includes(q)
-      );
+      result = result.filter((job) => fuzzyMatchJob(job, searchText));
     }
-    if (activeFilters.location.length > 0) {
+    // Location filter
+    if (activeFilters.location && activeFilters.location.length > 0) {
       result = result.filter((job) =>
         activeFilters.location.some((loc) =>
-          job?.location?.toLowerCase().includes(loc.toLowerCase())
+          job?.location?.toLowerCase().includes(loc.toLowerCase()) ||
+          loc.toLowerCase().includes(job?.location?.toLowerCase())
         )
       );
     }
-    if (activeFilters.title.length > 0) {
+    // Role / Title filter
+    if (activeFilters.title && activeFilters.title.length > 0) {
       result = result.filter((job) =>
         activeFilters.title.some((t) =>
           job?.title?.toLowerCase().includes(t.toLowerCase())
         )
       );
     }
-    if (activeFilters.jobType.length > 0) {
+    // Job Type filter
+    if (activeFilters.jobType && activeFilters.jobType.length > 0) {
       result = result.filter((job) =>
         activeFilters.jobType.some((jt) =>
           job?.jobType?.toLowerCase().includes(jt.toLowerCase())
         )
       );
     }
-    if (activeFilters.salary.length > 0) {
+    // Experience filter
+    if (activeFilters.experience && activeFilters.experience.length > 0) {
+      result = result.filter((job) => {
+        const exp = Number(job?.experience) || 0;
+        return activeFilters.experience.some((expRange) => {
+          if (expRange.includes('Fresher')) return exp === 0;
+          if (expRange.includes('1-2')) return exp >= 1 && exp <= 2;
+          if (expRange.includes('3-4')) return exp >= 3 && exp <= 4;
+          if (expRange.includes('5+')) return exp >= 5;
+          return true;
+        });
+      });
+    }
+    // Salary filter
+    if (activeFilters.salary && activeFilters.salary.length > 0) {
       result = result.filter((job) => {
         const salary = Number(job?.salary) || 0;
         return activeFilters.salary.some((rangeStr) => {

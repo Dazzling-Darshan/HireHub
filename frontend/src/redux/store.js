@@ -35,9 +35,9 @@ const migrations = {
 
 const persistConfig = {
   key: "root",
-  version: 2,
+  version: 3,
   storage: actualStorage,
-  migrate: createMigrate(migrations, { debug: false }),
+  whitelist: ["auth"], // Only persist logged-in auth state to avoid cross-user session pollution
 };
 
 const rootReducer = combineReducers({

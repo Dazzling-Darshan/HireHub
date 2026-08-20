@@ -53,6 +53,14 @@ const jobSlice = createSlice({
                 state.savedJobs.push(JSON.parse(JSON.stringify(job)));
             }
         },
+        clearUserJobData: (state) => {
+            state.allAppliedJobs = [];
+            state.allAdminJobs = [];
+            state.savedJobs = [];
+            state.singleJob = null;
+            state.appliedJobsPagination = emptyPagination(PAGE_LIMITS.table);
+            state.adminJobsPagination = emptyPagination(PAGE_LIMITS.table);
+        },
     },
 });
 
@@ -64,6 +72,7 @@ export const {
     setSearchJobByText,
     setSearchedQuery,
     toggleSaveJob,
+    clearUserJobData,
 } = jobSlice.actions;
 
 export default jobSlice.reducer;

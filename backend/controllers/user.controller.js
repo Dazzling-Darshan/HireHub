@@ -167,50 +167,74 @@ const logoutUser = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { fullName, email, phoneNumber, bio, skills } = req.body;
-
-    const userId = req.id; // from auth middleware
-    let user = await User.findById(userId);
-    if (!user) {
-      return res.status(400).json({
-        message: "User not found",
+    const userId = req.id;
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthorized. Please log in.",
         success: false,
       });
+    }
+
+    const { fullName, email, phoneNumber, bio, skills } = req.body;
+
+    let user = await User.findById(userId);
+    if (!user) {
+      res.clearCookie("token");
+      return res.status(401).json({
+        message: "User account session expired or not found. Please log in again.",
+        success: false,
+      });
+    }
+
+    // Check if new email is already taken by another user
+    if (email && email.trim().toLowerCase() !== user.email.toLowerCase()) {
+      const existingUser = await User.findOne({ email: email.trim().toLowerCase(), _id: { $ne: userId } });
+      if (existingUser) {
+        return res.status(400).json({
+          message: "Email is already in use by another account",
+          success: false,
+        });
+      }
     }
 
     let cloudResponse = null;
 
     if (req.file) {
-      const fileUri = getDataUri(req.file);
-      cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+      try {
+        const fileUri = getDataUri(req.file);
+        cloudResponse = await cloudinary.uploader.upload(fileUri.content, {
+          resource_type: "auto",
+        });
+      } catch (uploadError) {
+        console.error("Cloudinary upload failed:", uploadError);
+      }
     }
 
     if (!user.profile) {
       user.profile = {};
     }
 
-    if (skills) {
+    if (skills !== undefined) {
       const skillsArray = Array.isArray(skills)
         ? skills
-        : skills.split(",").map((s) => s.trim());
+        : skills
+        ? skills.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
 
       user.profile.skills = skillsArray;
     }
 
     // Update basic fields
-    if (fullName) user.fullName = fullName;
-    if (email) user.email = email;
-    if (phoneNumber) user.phoneNumber = phoneNumber;
+    if (fullName) user.fullName = fullName.trim();
+    if (email) user.email = email.trim().toLowerCase();
+    if (phoneNumber !== undefined) user.phoneNumber = phoneNumber.trim();
+    if (bio !== undefined) user.profile.bio = bio.trim();
 
-    
     if (cloudResponse) {
       user.profile.resume = cloudResponse.secure_url;
       user.profile.resumeOriginalName = req.file.originalname;
     }
 
-    // Ensure profile exists
-
-    if (bio) user.profile.bio = bio;
     await user.save();
 
     const safeUser = {
@@ -228,9 +252,9 @@ const updateProfile = async (req, res) => {
       user: safeUser,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Failed to update profile",
+    console.error("Error in updateProfile:", error);
+    return res.status(500).json({
+      message: error?.message || "Failed to update profile",
       success: false,
     });
   }

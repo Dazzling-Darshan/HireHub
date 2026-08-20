@@ -1,27 +1,83 @@
 /**
- * Normalize skill name for fuzzy matching
+ * Normalize text/skill token for fuzzy matching
  */
-const normalizeSkill = (skill = '') => {
-  return skill
+const normalizeToken = (token = '') => {
+  return token
     .toLowerCase()
     .trim()
-    .replace(/[.\-\s_]/g, '')
+    .replace(/[.\-\s_,/\\()]/g, '')
     .replace('javascript', 'js')
     .replace('typescript', 'ts')
     .replace('reactjs', 'react')
     .replace('nodejs', 'node')
     .replace('expressjs', 'express')
     .replace('mongodb', 'mongo')
-    .replace('tailwindcss', 'tailwind');
+    .replace('tailwindcss', 'tailwind')
+    .replace('postgresql', 'postgres')
+    .replace('amazonwebservices', 'aws');
 };
 
 /**
- * Calculate match percentage and skill breakdown between user profile skills and job requirements
- * @param {string[]} userSkills
- * @param {string[]} jobRequirements
+ * Common technical keywords dictionary for keyword extraction from bio & resume names
+ */
+const KNOWN_TECH_KEYWORDS = [
+  'react', 'node', 'express', 'mongodb', 'javascript', 'typescript', 'python',
+  'java', 'c++', 'c#', '.net', 'django', 'flask', 'fastapi', 'spring', 'springboot',
+  'sql', 'postgres', 'mysql', 'redis', 'docker', 'kubernetes', 'aws', 'azure',
+  'gcp', 'terraform', 'graphql', 'rest', 'tailwind', 'nextjs', 'redux', 'flutter',
+  'reactnative', 'kotlin', 'swift', 'ci/cd', 'git', 'linux', 'html', 'css',
+  'figma', 'ui/ux', 'scikitlearn', 'pytorch', 'tensorflow', 'pandas', 'nlp',
+  'tableau', 'powerbi', 'cybersecurity', 'selenium', 'cypress', 'playwright'
+];
+
+/**
+ * Extract candidate skill keywords from profile (skills list, bio text, resume name)
+ * @param {object} profile - user.profile object
+ * @returns {Set<string>} Set of normalized skill tokens
+ */
+export const extractCandidateSkills = (profile = {}) => {
+  const candidateTokens = new Set();
+
+  // 1. Direct skills array
+  if (Array.isArray(profile?.skills)) {
+    profile.skills.forEach((s) => {
+      if (s && typeof s === 'string') {
+        candidateTokens.add(normalizeToken(s));
+      }
+    });
+  }
+
+  // 2. Extract from bio text
+  if (profile?.bio && typeof profile.bio === 'string') {
+    const bioLower = profile.bio.toLowerCase();
+    KNOWN_TECH_KEYWORDS.forEach((kw) => {
+      if (bioLower.includes(kw.toLowerCase())) {
+        candidateTokens.add(normalizeToken(kw));
+      }
+    });
+  }
+
+  // 3. Extract from resume original name
+  if (profile?.resumeOriginalName && typeof profile.resumeOriginalName === 'string') {
+    const resumeNameLower = profile.resumeOriginalName.toLowerCase();
+    KNOWN_TECH_KEYWORDS.forEach((kw) => {
+      if (resumeNameLower.includes(kw.toLowerCase())) {
+        candidateTokens.add(normalizeToken(kw));
+      }
+    });
+  }
+
+  return candidateTokens;
+};
+
+/**
+ * Calculate match percentage and skill breakdown between candidate profile and job requirements
+ * @param {object|string[]} userOrSkills - user profile object or user skills array
+ * @param {string[]} jobRequirements - job requirements list
+ * @param {object} [job] - optional job object for extra title/description matching
  * @returns {{ percentage: number, matchedSkills: string[], missingSkills: string[], label: string, colorClass: string }}
  */
-export const calculateSkillMatch = (userSkills = [], jobRequirements = []) => {
+export const calculateSkillMatch = (userOrSkills, jobRequirements = [], job = null) => {
   if (!Array.isArray(jobRequirements) || jobRequirements.length === 0) {
     return {
       percentage: 0,
@@ -32,7 +88,15 @@ export const calculateSkillMatch = (userSkills = [], jobRequirements = []) => {
     };
   }
 
-  if (!Array.isArray(userSkills) || userSkills.length === 0) {
+  // Extract all candidate tokens from profile
+  let candidateTokens = new Set();
+  if (userOrSkills && typeof userOrSkills === 'object' && !Array.isArray(userOrSkills)) {
+    candidateTokens = extractCandidateSkills(userOrSkills.profile || userOrSkills);
+  } else if (Array.isArray(userOrSkills)) {
+    userOrSkills.forEach((s) => s && candidateTokens.add(normalizeToken(s)));
+  }
+
+  if (candidateTokens.size === 0) {
     return {
       percentage: 0,
       matchedSkills: [],
@@ -42,16 +106,15 @@ export const calculateSkillMatch = (userSkills = [], jobRequirements = []) => {
     };
   }
 
-  const normalizedUserSkills = new Set(userSkills.map(normalizeSkill));
-
   const matchedSkills = [];
   const missingSkills = [];
 
+  const candidateArray = Array.from(candidateTokens);
+
   jobRequirements.forEach((req) => {
-    const normReq = normalizeSkill(req);
-    // Check direct equality or substring inclusion
-    const isMatched = Array.from(normalizedUserSkills).some(
-      (userSkill) => userSkill === normReq || userSkill.includes(normReq) || normReq.includes(userSkill)
+    const normReq = normalizeToken(req);
+    const isMatched = candidateArray.some(
+      (token) => token === normReq || token.includes(normReq) || normReq.includes(token)
     );
 
     if (isMatched) {
@@ -61,7 +124,14 @@ export const calculateSkillMatch = (userSkills = [], jobRequirements = []) => {
     }
   });
 
-  const percentage = Math.round((matchedSkills.length / jobRequirements.length) * 100);
+  // Base match percentage on requirements
+  let percentage = Math.round((matchedSkills.length / jobRequirements.length) * 100);
+
+  // Bonus match if candidate has resume uploaded
+  const hasResume = (userOrSkills?.profile?.resume || userOrSkills?.resume);
+  if (hasResume && percentage > 0 && percentage < 95) {
+    percentage = Math.min(100, percentage + 5);
+  }
 
   let label = 'Needs Skills';
   let colorClass = 'bg-amber-500/10 text-amber-600 border-amber-500/20';

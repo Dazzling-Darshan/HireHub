@@ -11,9 +11,8 @@ import axios from 'axios'
 import { toast } from 'sonner'
 
 const UpdateProfileDialog = ({ open, setOpen }) => {
-
-    const [loading, setLoading] = useState(false)
-    const { user } = useSelector(store => store.auth)
+    const [loading, setLoading] = useState(false);
+    const { user } = useSelector(store => store.auth);
 
     const [input, setInput] = useState({
         fullName: user?.fullName || "",
@@ -22,40 +21,51 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         bio: user?.profile?.bio || "",
         skills: user?.profile?.skills?.join(', ') || "",
         file: null
-    })
-    const [errors, setErrors] = useState({})
+    });
+    const [errors, setErrors] = useState({});
 
     const dispatch = useDispatch();
 
+    // Synchronize form whenever dialog opens or user state updates
+    React.useEffect(() => {
+        if (open && user) {
+            setInput({
+                fullName: user?.fullName || "",
+                email: user?.email || "",
+                phoneNumber: user?.phoneNumber || "",
+                bio: user?.profile?.bio || "",
+                skills: user?.profile?.skills?.join(', ') || "",
+                file: null
+            });
+            setErrors({});
+        }
+    }, [open, user]);
+
     const validate = () => {
-        const newErrors = {}
+        const newErrors = {};
         if (!input.fullName.trim()) {
-            newErrors.fullName = "Full name is required"
+            newErrors.fullName = "Full name is required";
         } else if (input.fullName.trim().length < 2) {
-            newErrors.fullName = "Full name must be at least 2 characters"
+            newErrors.fullName = "Full name must be at least 2 characters";
         } else if (input.fullName.trim().length > 100) {
-            newErrors.fullName = "Full name cannot exceed 100 characters"
+            newErrors.fullName = "Full name cannot exceed 100 characters";
         }
         
-        // Email regex check
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        // Email check
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!input.email.trim()) {
-            newErrors.email = "Email is required"
+            newErrors.email = "Email is required";
         } else if (!emailRegex.test(input.email.trim())) {
-            newErrors.email = "Please enter a valid email"
+            newErrors.email = "Please enter a valid email address";
         }
 
-        if (!input.phoneNumber.trim()) {
-            newErrors.phoneNumber = "Phone number is required"
-        }
-        
-        if (input.bio.length > 500) {
-            newErrors.bio = "Bio cannot exceed 500 characters"
+        if (input.bio && input.bio.length > 500) {
+            newErrors.bio = "Bio cannot exceed 500 characters";
         }
 
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0
-    }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const changeEventHandler = (e) => {
         const { name, value } = e.target
@@ -94,27 +104,32 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         }
 
         try {
-
             setLoading(true);
             const res = await axios.post(
                 `${USER_API_ENDPOINT}/profile/update`,
                 formData,
                 { withCredentials: true }
-            )
+            );
 
             if (res.data.success) {
                 dispatch(setUser(res.data.user));
-                toast.success(res.data.message);
+                toast.success(res.data.message || "Profile updated successfully!");
+                setOpen(false);
             }
 
         } catch (error) {
-            console.log(error);
-            toast.error(error.response?.data?.message || "Something went wrong");
+            console.error("Profile update error:", error);
+            const errorMsg = error.response?.data?.message || "Failed to update profile";
+            toast.error(errorMsg);
+
+            if (error.response?.status === 401) {
+                dispatch(setUser(null));
+                setOpen(false);
+            }
         } finally {
             setLoading(false);
-            setOpen(false);
         }
-    }
+    };
 
     return (
         <div>

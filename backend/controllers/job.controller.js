@@ -189,6 +189,7 @@ const getAllJobs = async (req, res) => {
     if (!hasPagination) {
       const jobs = await Job.find(query)
         .populate({ path: "company" })
+        .populate({ path: "createdBy", select: "fullName email phoneNumber role" })
         .sort({ createdAt: -1 });
 
       const responsePayload = {
@@ -204,6 +205,7 @@ const getAllJobs = async (req, res) => {
     const [jobs, total] = await Promise.all([
       Job.find(query)
         .populate({ path: "company" })
+        .populate({ path: "createdBy", select: "fullName email phoneNumber role" })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
@@ -239,12 +241,15 @@ const getJobById = async (req, res) => {
       return res.status(200).json(cachedData);
     }
 
-    const job = await Job.findById(jobId).populate({
-      path: "applications",
-      populate: {
-        path: "applicant",
-      },
-    });
+    const job = await Job.findById(jobId)
+      .populate({ path: "company" })
+      .populate({ path: "createdBy", select: "fullName email phoneNumber role" })
+      .populate({
+        path: "applications",
+        populate: {
+          path: "applicant",
+        },
+      });
 
     if (!job) {
       return res.status(404).json({

@@ -1,61 +1,121 @@
-import React, { useState } from "react";
-import { X } from "lucide-react";
-
-const filterData = [
-  {
-    filterType: "Location",
-    key: "location",
-    array: [
-      "Bangalore",
-      "Hyderabad",
-      "Mumbai",
-      "Pune",
-      "Delhi NCR",
-      "Gurgaon",
-      "Noida",
-      "Chennai",
-      "Kolkata",
-      "Ahmedabad",
-      "Kochi",
-      "Jaipur",
-      "Chandigarh",
-      "Indore",
-      "Bhubaneswar",
-      "Remote",
-    ],
-  },
-  {
-    filterType: "Industry / Role",
-    key: "title",
-    array: [
-      "Frontend Developer",
-      "Backend Developer",
-      "Full Stack Developer",
-      "Data Engineer",
-      "ML Engineer",
-      "Cloud Architect",
-      "DevOps Engineer",
-    ],
-  },
-  {
-    filterType: "Job Type",
-    key: "jobType",
-    array: ["Full Time", "Part Time", "Contract", "Internship", "Freelance"],
-  },
-  {
-    filterType: "Salary (LPA)",
-    key: "salary",
-    array: ["0-5", "6-10", "11-20", "21-40", "40+"],
-  },
-];
+import React, { useMemo, useState } from "react";
+import { X, MapPin, Briefcase, Award, DollarSign } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const FilterCard = ({ onFilterChange }) => {
+  const { allJobs = [] } = useSelector((store) => store.job);
+
   const [selectedFilters, setSelectedFilters] = useState({
     location: new Set(),
     title: new Set(),
     jobType: new Set(),
+    experience: new Set(),
     salary: new Set(),
   });
+
+  // Dynamically compute unique options and counts present in the actual database jobs
+  const dynamicFilterData = useMemo(() => {
+    const locationCounts = {};
+    const titleCounts = {};
+    const jobTypeCounts = {};
+    const expCounts = {
+      "Fresher (0 yrs)": 0,
+      "1-2 yrs": 0,
+      "3-4 yrs": 0,
+      "5+ yrs": 0,
+    };
+    const salaryCounts = {
+      "0-10": 0,
+      "11-20": 0,
+      "21-30": 0,
+      "30+": 0,
+    };
+
+    allJobs.forEach((job) => {
+      // Locations
+      if (job.location) {
+        locationCounts[job.location] = (locationCounts[job.location] || 0) + 1;
+      }
+      // Titles / Roles
+      if (job.title) {
+        titleCounts[job.title] = (titleCounts[job.title] || 0) + 1;
+      }
+      // Job Types
+      if (job.jobType) {
+        jobTypeCounts[job.jobType] = (jobTypeCounts[job.jobType] || 0) + 1;
+      }
+      // Experience
+      const exp = Number(job.experience) || 0;
+      if (exp === 0) expCounts["Fresher (0 yrs)"]++;
+      else if (exp <= 2) expCounts["1-2 yrs"]++;
+      else if (exp <= 4) expCounts["3-4 yrs"]++;
+      else expCounts["5+ yrs"]++;
+
+      // Salary
+      const sal = Number(job.salary) || 0;
+      if (sal <= 10) salaryCounts["0-10"]++;
+      else if (sal <= 20) salaryCounts["11-20"]++;
+      else if (sal <= 30) salaryCounts["21-30"]++;
+      else salaryCounts["30+"]++;
+    });
+
+    const locations = Object.entries(locationCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([loc, count]) => ({ label: loc, value: loc, count }));
+
+    const titles = Object.entries(titleCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([title, count]) => ({ label: title, value: title, count }));
+
+    const jobTypes = Object.entries(jobTypeCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([jt, count]) => ({ label: jt, value: jt, count }));
+
+    const experiences = Object.entries(expCounts)
+      .filter(([_, count]) => count > 0)
+      .map(([label, count]) => ({ label, value: label, count }));
+
+    const salaries = Object.entries(salaryCounts)
+      .filter(([_, count]) => count > 0)
+      .map(([range, count]) => ({
+        label: range === "30+" ? "30+ LPA" : `${range} LPA`,
+        value: range,
+        count,
+      }));
+
+    return [
+      {
+        filterType: "Locations",
+        icon: <MapPin className="w-4 h-4 text-primary" />,
+        key: "location",
+        items: locations,
+      },
+      {
+        filterType: "Job Roles",
+        icon: <Briefcase className="w-4 h-4 text-primary" />,
+        key: "title",
+        items: titles,
+      },
+      {
+        filterType: "Job Types",
+        icon: <Award className="w-4 h-4 text-primary" />,
+        key: "jobType",
+        items: jobTypes,
+      },
+      {
+        filterType: "Experience Level",
+        icon: <Award className="w-4 h-4 text-primary" />,
+        key: "experience",
+        items: experiences,
+      },
+      {
+        filterType: "Salary Range",
+        icon: <DollarSign className="w-4 h-4 text-primary" />,
+        key: "salary",
+        items: salaries,
+      },
+    ].filter((section) => section.items.length > 0);
+  }, [allJobs]);
 
   const toggleFilter = (key, value) => {
     setSelectedFilters((prev) => {
@@ -79,23 +139,23 @@ const FilterCard = ({ onFilterChange }) => {
       location: new Set(),
       title: new Set(),
       jobType: new Set(),
+      experience: new Set(),
       salary: new Set(),
     };
     setSelectedFilters(empty);
-    onFilterChange?.({ location: [], title: [], jobType: [], salary: [] });
+    onFilterChange?.({ location: [], title: [], jobType: [], experience: [], salary: [] });
   };
 
   const totalActive = Object.values(selectedFilters).reduce((acc, s) => acc + s.size, 0);
 
   return (
-    <div className="w-full p-6 bg-card rounded-2xl border border-border shadow-sm sticky top-24">
-
+    <div className="w-full p-6 bg-card rounded-2xl border-2 border-border shadow-md sticky top-24">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <h1 className="text-base font-bold text-foreground">Filters</h1>
+          <h1 className="text-lg font-extrabold text-foreground tracking-tight">Filters</h1>
           {totalActive > 0 && (
-            <span className="bg-primary text-primary-foreground text-xs rounded-full px-2.5 py-0.5 font-bold shadow-sm">
+            <span className="bg-primary text-primary-foreground text-xs rounded-full px-2.5 py-0.5 font-extrabold shadow-sm">
               {totalActive}
             </span>
           )}
@@ -103,49 +163,66 @@ const FilterCard = ({ onFilterChange }) => {
         {totalActive > 0 && (
           <button
             onClick={clearAll}
-            className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors font-semibold bg-destructive/10 px-2 py-1 rounded-md"
+            className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors font-bold bg-destructive/10 px-2.5 py-1 rounded-lg"
           >
             <X className="w-3.5 h-3.5" />
-            Clear
+            Clear All
           </button>
         )}
       </div>
 
-      <hr className="my-4 border-border" />
+      <p className="text-xs text-muted-foreground mb-4">
+        Showing real openings active in database
+      </p>
+
+      <hr className="my-3 border-border" />
 
       {/* Filter sections */}
       <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-        {filterData.map((data, index) => (
+        {dynamicFilterData.map((data, index) => (
           <div key={index}>
-            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">
-              {data.filterType}
-            </h2>
+            <div className="flex items-center gap-2 mb-3">
+              {data.icon}
+              <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                {data.filterType}
+              </h2>
+            </div>
             <div className="space-y-1.5">
-              {data.array.map((item, idx) => {
-                const isChecked = selectedFilters[data.key]?.has(item);
+              {data.items.map((item, idx) => {
+                const isChecked = selectedFilters[data.key]?.has(item.value);
                 return (
                   <label
                     key={idx}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 group ${
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all duration-200 group ${
                       isChecked
-                        ? "bg-primary/10 border border-primary/20"
-                        : "border border-transparent hover:bg-muted"
+                        ? "bg-primary/10 border border-primary/30 shadow-sm"
+                        : "border border-transparent hover:bg-muted/60"
                     }`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => toggleFilter(data.key, item)}
-                      className="w-4 h-4 accent-primary cursor-pointer rounded border-border"
-                    />
-                    <span className={`text-sm transition-colors ${isChecked ? "text-primary font-bold" : "text-foreground group-hover:text-primary"}`}>
-                      {item}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleFilter(data.key, item.value)}
+                        className="w-4 h-4 accent-primary cursor-pointer rounded border-border shrink-0"
+                      />
+                      <span
+                        className={`text-sm truncate transition-colors ${
+                          isChecked ? "text-primary font-bold" : "text-foreground group-hover:text-primary"
+                        }`}
+                        title={item.label}
+                      >
+                        {item.label}
+                      </span>
+                    </div>
+                    <span className="text-xs font-semibold text-muted-foreground ml-2 px-1.5 py-0.5 rounded bg-muted">
+                      {item.count}
                     </span>
                   </label>
                 );
               })}
             </div>
-            {index < filterData.length - 1 && <hr className="mt-6 border-border" />}
+            {index < dynamicFilterData.length - 1 && <hr className="mt-5 border-border" />}
           </div>
         ))}
       </div>
