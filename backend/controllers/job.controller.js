@@ -3,6 +3,13 @@ import {
   getPaginationParams,
   buildPaginationResponse,
 } from "../utils/pagination.js";
+import {
+  getCache,
+  setCache,
+  deleteCache,
+  deleteKeysByPattern,
+  CACHE_TTL,
+} from "../utils/redis.js";
 
 // CREATE JOB
 const postJob = async (req, res) => {
@@ -52,6 +59,12 @@ const postJob = async (req, res) => {
       createdBy: userId,
       ...(expiryDate && { expiryDate: new Date(expiryDate) }),
     });
+
+    // Invalidate cached job listings
+    await Promise.all([
+      deleteKeysByPattern("jobs:all:*"),
+      deleteKeysByPattern(`jobs:admin:${userId}:*`),
+    ]);
 
     return res.status(201).json({
       message: "New Job created successfully",
@@ -106,6 +119,13 @@ const updateJob = async (req, res) => {
 
     await job.save();
 
+    // Invalidate cached job data
+    await Promise.all([
+      deleteCache(`jobs:detail:${jobId}`),
+      deleteKeysByPattern("jobs:all:*"),
+      deleteKeysByPattern(`jobs:admin:${userId}:*`),
+    ]);
+
     return res.status(200).json({
       message: "Job updated successfully",
       success: true,
@@ -126,6 +146,13 @@ const getAllJobs = async (req, res) => {
     const keyword = req.query.keyword || "";
     const hasPagination =
       req.query.page !== undefined || req.query.limit !== undefined;
+    const { page, limit, skip } = getPaginationParams(req, 9);
+
+    const cacheKey = `jobs:all:${keyword}:${hasPagination ? `${page}:${limit}` : "all"}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
 
     const query = keyword
       ? {
@@ -141,13 +168,15 @@ const getAllJobs = async (req, res) => {
         .populate({ path: "company" })
         .sort({ createdAt: -1 });
 
-      return res.status(200).json({
+      const responsePayload = {
         jobs,
         success: true,
-      });
-    }
+      };
 
-    const { page, limit, skip } = getPaginationParams(req, 9);
+      await setCache(cacheKey, responsePayload, CACHE_TTL.MEDIUM);
+
+      return res.status(200).json(responsePayload);
+    }
 
     const [jobs, total] = await Promise.all([
       Job.find(query)
@@ -158,11 +187,15 @@ const getAllJobs = async (req, res) => {
       Job.countDocuments(query),
     ]);
 
-    return res.status(200).json({
+    const responsePayload = {
       jobs,
       pagination: buildPaginationResponse(page, limit, total),
       success: true,
-    });
+    };
+
+    await setCache(cacheKey, responsePayload, CACHE_TTL.MEDIUM);
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -176,12 +209,18 @@ const getAllJobs = async (req, res) => {
 const getJobById = async (req, res) => {
   try {
     const jobId = req.params.id;
+    const cacheKey = `jobs:detail:${jobId}`;
+
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
 
     const job = await Job.findById(jobId).populate({
       path: "applications",
       populate: {
-        path: "applicant"
-      }
+        path: "applicant",
+      },
     });
 
     if (!job) {
@@ -191,11 +230,15 @@ const getJobById = async (req, res) => {
       });
     }
 
-    return res.status(200).json({
+    const responsePayload = {
       message: "Job found successfully",
       success: true,
       job,
-    });
+    };
+
+    await setCache(cacheKey, responsePayload, CACHE_TTL.LONG);
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -211,6 +254,12 @@ const getAdminJobs = async (req, res) => {
     const recruiterId = req.id;
     const { page, limit, skip } = getPaginationParams(req, 10);
     const keyword = req.query.keyword || "";
+
+    const cacheKey = `jobs:admin:${recruiterId}:${keyword}:${page}:${limit}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
 
     const query = { createdBy: recruiterId };
     if (keyword) {
@@ -229,12 +278,16 @@ const getAdminJobs = async (req, res) => {
       Job.countDocuments(query),
     ]);
 
-    return res.status(200).json({
+    const responsePayload = {
       message: total === 0 ? "No jobs found" : "Jobs found",
       success: true,
       jobs,
       pagination: buildPaginationResponse(page, limit, total),
-    });
+    };
+
+    await setCache(cacheKey, responsePayload, CACHE_TTL.SHORT);
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.log(error);
     return res.status(500).json({

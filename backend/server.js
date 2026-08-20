@@ -3,13 +3,13 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './utils/db.js';
+import './utils/redis.js';
+import { isCacheAvailable } from './utils/redis.js';
 import authRoutes from './routes/user.routes.js';
 import companyRoutes from './routes/company.route.js';
 import jobRoutes from './routes/job.route.js';
 import applicationRoutes from './routes/application.route.js';
 import path from "path";
-
-
 
 dotenv.config();
 
@@ -28,10 +28,22 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Health check endpoint
+app.get("/api/v1/health", (req, res) => {
+    res.status(200).json({
+        status: "healthy",
+        timestamp: new Date().toISOString(),
+        services: {
+            database: "connected",
+            cache: isCacheAvailable() ? "connected" : "bypassed (mongodb fallback active)",
+        },
+    });
+});
+
 app.use("/api/v1/user", authRoutes);
-app.use("/api/v1/company",companyRoutes);
-app.use("/api/v1/job",jobRoutes);
-app.use("/api/v1/application",applicationRoutes);
+app.use("/api/v1/company", companyRoutes);
+app.use("/api/v1/job", jobRoutes);
+app.use("/api/v1/application", applicationRoutes);
 
 const PORT = process.env.PORT || 3000;
 

@@ -5,11 +5,19 @@ import {
     getPaginationParams,
     buildPaginationResponse,
 } from '../utils/pagination.js';
+import {
+    getCache,
+    setCache,
+    deleteCache,
+    deleteKeysByPattern,
+    CACHE_TTL,
+} from '../utils/redis.js';
 
 // REGISTER COMPANY
 const registerCompany = async (req, res) => {
     try {
         const { companyName } = req.body;
+        const userId = req.id;
 
         if (!companyName) {
             return res.status(400).json({
@@ -29,8 +37,11 @@ const registerCompany = async (req, res) => {
 
         company = await Company.create({
             name: companyName,
-            createdBy: req.id,
+            createdBy: userId,
         });
+
+        // Invalidate cached company lists for this user
+        await deleteKeysByPattern(`companies:user:${userId}:*`);
 
         return res.status(201).json({
             message: "Company registered successfully",
@@ -55,6 +66,13 @@ const getCompanies = async (req, res) => {
         const hasPagination =
             req.query.page !== undefined || req.query.limit !== undefined;
         const keyword = req.query.keyword || "";
+        const { page, limit, skip } = getPaginationParams(req, 10);
+
+        const cacheKey = `companies:user:${userId}:${keyword}:${hasPagination ? `${page}:${limit}` : "all"}`;
+        const cachedData = await getCache(cacheKey);
+        if (cachedData) {
+            return res.status(200).json(cachedData);
+        }
 
         const query = { createdBy: userId };
         if (keyword) {
@@ -63,26 +81,32 @@ const getCompanies = async (req, res) => {
 
         if (!hasPagination) {
             const companies = await Company.find(query).sort({ createdAt: -1 });
-            return res.status(200).json({
+            const responsePayload = {
                 message: companies.length === 0 ? "No companies found" : "Companies fetched successfully",
                 success: true,
                 companies,
-            });
-        }
+            };
 
-        const { page, limit, skip } = getPaginationParams(req, 10);
+            await setCache(cacheKey, responsePayload, CACHE_TTL.MEDIUM);
+
+            return res.status(200).json(responsePayload);
+        }
 
         const [companies, total] = await Promise.all([
             Company.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
             Company.countDocuments(query),
         ]);
 
-        return res.status(200).json({
+        const responsePayload = {
             message: total === 0 ? "No companies found" : "Companies fetched successfully",
             success: true,
             companies,
             pagination: buildPaginationResponse(page, limit, total),
-        });
+        };
+
+        await setCache(cacheKey, responsePayload, CACHE_TTL.MEDIUM);
+
+        return res.status(200).json(responsePayload);
 
     } catch (error) {
         console.log(error);
@@ -98,6 +122,12 @@ const getCompanies = async (req, res) => {
 const getCompanyById = async (req, res) => {
     try {
         const companyId = req.params.id;
+        const cacheKey = `companies:detail:${companyId}`;
+
+        const cachedData = await getCache(cacheKey);
+        if (cachedData) {
+            return res.status(200).json(cachedData);
+        }
 
         const company = await Company.findById(companyId);
 
@@ -108,11 +138,15 @@ const getCompanyById = async (req, res) => {
             });
         }
 
-        return res.status(200).json({
+        const responsePayload = {
             message: "Company found",
             success: true,
             company
-        });
+        };
+
+        await setCache(cacheKey, responsePayload, CACHE_TTL.LONG);
+
+        return res.status(200).json(responsePayload);
 
     } catch (error) {
         console.log(error);
@@ -125,6 +159,8 @@ const getCompanyById = async (req, res) => {
 
 const updateCompany = async (req, res) => {
     try {
+        const companyId = req.params.id;
+        const userId = req.id;
         const { name, description, website, location } = req.body;
         const file = req.file;
         
@@ -142,7 +178,7 @@ const updateCompany = async (req, res) => {
             });
         }
 
-        const company = await Company.findById(req.params.id);
+        const company = await Company.findById(companyId);
 
         if (!company) {
             return res.status(404).json({
@@ -158,10 +194,18 @@ const updateCompany = async (req, res) => {
         }
 
         const updatedCompany = await Company.findByIdAndUpdate(
-            req.params.id,
+            companyId,
             updateData,
             { new: true }
         );
+
+        // Invalidate company caches, user list, and populated job caches
+        await Promise.all([
+            deleteCache(`companies:detail:${companyId}`),
+            deleteKeysByPattern(`companies:user:${userId}:*`),
+            deleteKeysByPattern("jobs:all:*"),
+            deleteKeysByPattern("jobs:admin:*"),
+        ]);
 
         return res.status(200).json({
             message: "Company updated successfully",

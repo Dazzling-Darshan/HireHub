@@ -4,6 +4,13 @@ import {
   getPaginationParams,
   buildPaginationResponse,
 } from "../utils/pagination.js";
+import {
+  getCache,
+  setCache,
+  deleteCache,
+  deleteKeysByPattern,
+  CACHE_TTL,
+} from "../utils/redis.js";
 
 // APPLY JOB
 const applyJob = async (req, res) => {
@@ -47,6 +54,13 @@ const applyJob = async (req, res) => {
     job.applications.push(newApplication._id);
     await job.save();
 
+    // Invalidate applied jobs for user, applicant list for job, and single job detail
+    await Promise.all([
+      deleteKeysByPattern(`applications:user:${userId}:*`),
+      deleteKeysByPattern(`applications:job:${jobId}:*`),
+      deleteCache(`jobs:detail:${jobId}`),
+    ]);
+
     return res.status(201).json({
       message: "Job applied successfully",
       success: true,
@@ -67,6 +81,12 @@ const getAppliedJobs = async (req, res) => {
     const userId = req.id;
     const { page, limit, skip } = getPaginationParams(req, 7);
 
+    const cacheKey = `applications:user:${userId}:${page}:${limit}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
     const query = { applicant: userId };
 
     const [applications, total] = await Promise.all([
@@ -83,11 +103,15 @@ const getAppliedJobs = async (req, res) => {
       Application.countDocuments(query),
     ]);
 
-    return res.status(200).json({
+    const responsePayload = {
       success: true,
       applications,
       pagination: buildPaginationResponse(page, limit, total),
-    });
+    };
+
+    await setCache(cacheKey, responsePayload, CACHE_TTL.SHORT);
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -102,6 +126,12 @@ const getApplicant = async (req, res) => {
   try {
     const jobId = req.params.id;
     const { page, limit, skip } = getPaginationParams(req, 10);
+
+    const cacheKey = `applications:job:${jobId}:${page}:${limit}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
 
     const job = await Job.findById(jobId).populate({ path: "company" });
 
@@ -133,7 +163,7 @@ const getApplicant = async (req, res) => {
       else if (_id === "pending") stats.pending = count;
     });
 
-    return res.status(200).json({
+    const responsePayload = {
       success: true,
       job: {
         ...job.toObject(),
@@ -141,7 +171,11 @@ const getApplicant = async (req, res) => {
       },
       stats,
       pagination: buildPaginationResponse(page, limit, total),
-    });
+    };
+
+    await setCache(cacheKey, responsePayload, CACHE_TTL.SHORT);
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -177,6 +211,13 @@ const updateStatus = async (req, res) => {
 
     application.status = status.toLowerCase();
     await application.save();
+
+    // Invalidate applicant list for job, user's applications, and job details
+    await Promise.all([
+      deleteKeysByPattern(`applications:job:${application.job}:*`),
+      deleteKeysByPattern(`applications:user:${application.applicant}:*`),
+      deleteCache(`jobs:detail:${application.job}`),
+    ]);
 
     return res.status(200).json({
       message: "Status updated successfully",
