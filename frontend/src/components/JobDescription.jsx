@@ -5,11 +5,11 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { APPLICATION_API_ENDPOINT, JOB_API_ENDPOINT } from '@/utils/constant';
+import { APPLICATION_API_ENDPOINT, JOB_API_ENDPOINT, AI_API_ENDPOINT } from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import { Loader2, Sparkles, CheckCircle2, CircleDashed, Share2, Copy, Check, MapPin, Calendar, User as UserIcon, ArrowLeft } from 'lucide-react';
+import { Loader2, Sparkles, CheckCircle2, CircleDashed, Share2, Copy, Check, MapPin, Calendar, User as UserIcon, ArrowLeft, BrainCircuit, Lightbulb, HelpCircle, Zap, BookOpen, AlertCircle } from 'lucide-react';
 import { formatSalary } from './LatestJobCards';
 import { calculateSkillMatch } from '@/utils/skillMatcher';
 
@@ -26,6 +26,10 @@ const JobDescription = () => {
     const [applying, setApplying] = useState(false);
     const [hasAppliedLocal, setHasAppliedLocal] = useState(false);
     const [copied, setCopied] = useState(false);
+
+    // AI Analysis State
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiAnalysis, setAiAnalysis] = useState(null);
 
     const isCurrentJobLoaded = singleJob && singleJob._id === jobId;
 
@@ -89,6 +93,33 @@ const JobDescription = () => {
         setCopied(true);
         toast.success("Job link copied to clipboard!");
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleAnalyzeWithAI = async () => {
+        if (!user) {
+            toast.error("Please login as a candidate to run Gemini AI analysis");
+            navigate("/login");
+            return;
+        }
+        setAiLoading(true);
+        try {
+            const res = await axios.post(
+                `${AI_API_ENDPOINT}/skill-match/${jobId}`,
+                {},
+                { withCredentials: true }
+            );
+
+            if (res.data.success) {
+                setAiAnalysis(res.data.analysis);
+                toast.success("AI skill match analysis generated successfully!");
+            }
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message || "Failed to generate AI candidate analysis"
+            );
+        } finally {
+            setAiLoading(false);
+        }
     };
 
     const shareUrl = encodeURIComponent(window.location.href);
@@ -253,28 +284,47 @@ const JobDescription = () => {
 
                     {/* Skill Match Analysis Card (for logged-in students) */}
                     {skillMatch && (
-                        <div className="my-8 p-6 rounded-2xl bg-gradient-to-br from-primary/5 via-card to-card border border-primary/20 shadow-sm animate-in fade-in duration-500">
+                        <div className="my-8 p-6 rounded-3xl bg-gradient-to-br from-primary/5 via-card to-card border border-primary/20 shadow-sm animate-in fade-in duration-500">
                             <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
                                 <div className="flex items-center gap-2.5">
-                                    <Sparkles className="w-5 h-5 text-primary" />
-                                    <h3 className="font-bold text-lg text-foreground">Candidate Skill Match</h3>
+                                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                                        <Sparkles className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg text-foreground">Candidate Skill Compatibility</h3>
+                                        <p className="text-xs text-muted-foreground">Based on your profile skills, bio, and resume</p>
+                                    </div>
                                 </div>
-                                <span className={`text-xs px-3.5 py-1 rounded-full font-bold border ${skillMatch.colorClass}`}>
-                                    {skillMatch.percentage}% Match · {skillMatch.label}
-                                </span>
+                                <div className="flex items-center gap-3">
+                                    <span className={`text-xs px-3.5 py-1 rounded-full font-bold border ${skillMatch.colorClass}`}>
+                                        {skillMatch.percentage}% Match · {skillMatch.label}
+                                    </span>
+                                    <Button
+                                        onClick={handleAnalyzeWithAI}
+                                        disabled={aiLoading}
+                                        size="sm"
+                                        className="rounded-full px-4 py-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all duration-300 gap-1.5"
+                                    >
+                                        {aiLoading ? (
+                                            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Analyzing with Gemini...</>
+                                        ) : (
+                                            <><BrainCircuit className="w-3.5 h-3.5" /> ⚡ Analyze Fit with Gemini AI</>
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
 
                             <div className="w-full bg-muted rounded-full h-2.5 mb-6 overflow-hidden">
                                 <div
-                                    className="bg-gradient-to-r from-primary to-emerald-500 h-2.5 rounded-full transition-all duration-700"
+                                    className="bg-gradient-to-r from-primary via-purple-500 to-emerald-500 h-2.5 rounded-full transition-all duration-700"
                                     style={{ width: `${Math.max(skillMatch.percentage, 5)}%` }}
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-2">
                                 <div>
                                     <p className="font-semibold text-emerald-600 mb-2 flex items-center gap-1.5">
-                                        <CheckCircle2 className="w-4 h-4" /> Matched Skills ({skillMatch.matchedSkills.length})
+                                        <CheckCircle2 className="w-4 h-4" /> Matched Prerequisites ({skillMatch.matchedSkills.length})
                                     </p>
                                     <div className="flex flex-wrap gap-1.5">
                                         {skillMatch.matchedSkills.length > 0 ? (
@@ -284,14 +334,14 @@ const JobDescription = () => {
                                                 </span>
                                             ))
                                         ) : (
-                                            <span className="text-xs text-muted-foreground">No overlapping skills found in profile</span>
+                                            <span className="text-xs text-muted-foreground">No direct overlapping skills detected</span>
                                         )}
                                     </div>
                                 </div>
 
                                 <div>
                                     <p className="font-semibold text-amber-600 mb-2 flex items-center gap-1.5">
-                                        <CircleDashed className="w-4 h-4" /> Skills to Learn ({skillMatch.missingSkills.length})
+                                        <CircleDashed className="w-4 h-4" /> Recommended Skills to Learn ({skillMatch.missingSkills.length})
                                     </p>
                                     <div className="flex flex-wrap gap-1.5">
                                         {skillMatch.missingSkills.length > 0 ? (
@@ -301,11 +351,107 @@ const JobDescription = () => {
                                                 </span>
                                             ))
                                         ) : (
-                                            <span className="text-xs text-emerald-600 font-medium">You meet 100% of the requirements!</span>
+                                            <span className="text-xs text-emerald-600 font-medium">You meet 100% of the listed requirements!</span>
                                         )}
                                     </div>
                                 </div>
                             </div>
+
+                            {/* AI Detailed Breakdown Card */}
+                            {aiAnalysis && (
+                                <div className="mt-6 pt-6 border-t border-primary/20 animate-in fade-in slide-in-from-top-4 duration-500">
+                                    <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 border border-indigo-500/30">
+                                        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <BrainCircuit className="w-5 h-5 text-indigo-500" />
+                                                <span className="font-bold text-foreground text-sm uppercase tracking-wider">
+                                                    Gemini AI Candidate Fit Analysis
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Badge className="bg-indigo-600 text-white font-bold text-xs">
+                                                    AI Score: {aiAnalysis.matchScore}%
+                                                </Badge>
+                                                {aiAnalysis.modelUsed && (
+                                                    <span className="text-[10px] text-muted-foreground font-mono">
+                                                        {aiAnalysis.modelUsed}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <p className="text-sm text-foreground/90 leading-relaxed mb-4 italic bg-card/60 p-3.5 rounded-xl border border-border">
+                                            "{aiAnalysis.fitSummary}"
+                                        </p>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4 text-xs">
+                                            {aiAnalysis.strengths?.length > 0 && (
+                                                <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                                    <p className="font-bold text-emerald-700 dark:text-emerald-400 mb-2 flex items-center gap-1.5 text-sm">
+                                                        <CheckCircle2 className="w-4 h-4" /> Key Candidate Strengths
+                                                    </p>
+                                                    <ul className="space-y-1 text-muted-foreground">
+                                                        {aiAnalysis.strengths.map((str, idx) => (
+                                                            <li key={idx} className="flex items-start gap-1.5">
+                                                                <span className="text-emerald-500 font-bold">•</span>
+                                                                <span>{str}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                            {aiAnalysis.missingSkills?.length > 0 && (
+                                                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                                    <p className="font-bold text-amber-700 dark:text-amber-400 mb-2 flex items-center gap-1.5 text-sm">
+                                                        <AlertCircle className="w-4 h-4" /> Key Skill Gaps to Address
+                                                    </p>
+                                                    <ul className="space-y-1 text-muted-foreground">
+                                                        {aiAnalysis.missingSkills.map((gap, idx) => (
+                                                            <li key={idx} className="flex items-start gap-1.5">
+                                                                <span className="text-amber-500 font-bold">•</span>
+                                                                <span>{gap}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {aiAnalysis.suggestions?.length > 0 && (
+                                            <div className="mt-4 p-3.5 rounded-xl bg-card border border-border">
+                                                <p className="font-bold text-foreground mb-2 flex items-center gap-1.5 text-xs uppercase tracking-wider text-indigo-500">
+                                                    <Lightbulb className="w-4 h-4" /> Actionable Learning & Application Suggestions
+                                                </p>
+                                                <ul className="space-y-1.5 text-xs text-muted-foreground">
+                                                    {aiAnalysis.suggestions.map((sug, idx) => (
+                                                        <li key={idx} className="flex items-start gap-2">
+                                                            <span className="font-bold text-primary">{idx + 1}.</span>
+                                                            <span>{sug}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {aiAnalysis.interviewPrepTips?.length > 0 && (
+                                            <div className="mt-4 p-3.5 rounded-xl bg-card border border-border">
+                                                <p className="font-bold text-foreground mb-2 flex items-center gap-1.5 text-xs uppercase tracking-wider text-purple-500">
+                                                    <BookOpen className="w-4 h-4" /> Technical Interview Preparation Tips
+                                                </p>
+                                                <ul className="space-y-1.5 text-xs text-muted-foreground">
+                                                    {aiAnalysis.interviewPrepTips.map((tip, idx) => (
+                                                        <li key={idx} className="flex items-start gap-2">
+                                                            <span className="text-purple-500 font-bold">★</span>
+                                                            <span>{tip}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 

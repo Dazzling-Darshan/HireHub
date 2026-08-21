@@ -6,8 +6,9 @@ import { Button } from "../ui/button";
 import CompaniesTable from "./CompaniesTable";
 import { useNavigate } from "react-router-dom";
 import useGetAllCompanies from "@/hooks/useGetAllCompanies";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setSearchCompanyByText } from "@/redux/companySlice";
+import { Building2, Search, X, PlusCircle } from "lucide-react";
 
 const Companies = () => {
   const [page, setPage] = useState(1);
@@ -15,6 +16,9 @@ const Companies = () => {
   const [keyword, setKeyword] = useState("");
 
   useGetAllCompanies(page, 10, keyword);
+  const { companiesPagination } = useSelector((store) => store.company);
+  const total = companiesPagination?.total || 0;
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -35,32 +39,53 @@ const Companies = () => {
       <Navbar />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-in fade-in duration-500">
-        <div className="mb-8">
-          <p className="text-sm font-bold text-primary uppercase tracking-wider mb-2">
-            Recruiters Portal
-          </p>
-          <h2 className="text-4xl font-extrabold text-foreground tracking-tight">
-            Company Management
-          </h2>
-          <p className="text-muted-foreground mt-2 text-base">
-            Manage your registered companies and organization details.
-          </p>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
-          <Input
-            className="max-w-sm bg-muted/50 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all rounded-xl"
-            placeholder="Search company by name..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-bold text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20 uppercase tracking-wider">
+                Recruiter Portal
+              </span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                {total} {total === 1 ? "Company" : "Companies"} Registered
+              </span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+              Company Management
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+              Manage your organizations, branding logos, locations, and company websites.
+            </p>
+          </div>
 
           <Button
-            className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-md hover:shadow-lg rounded-xl font-bold hover:-translate-y-0.5"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-md hover:shadow-lg rounded-xl font-bold hover:-translate-y-0.5 gap-2 px-6 h-11 self-start md:self-auto"
             onClick={() => navigate("/admin/companies/create")}
           >
-            + New Company
+            <PlusCircle className="w-4 h-4" />
+            Register Company
           </Button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-6 flex items-center gap-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              className="pl-10 pr-9 bg-muted/40 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all rounded-xl h-11 text-sm"
+              placeholder="Search by company name, location, or website..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            {input && (
+              <button
+                onClick={() => setInput("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         <CompaniesTable page={page} onPageChange={setPage} />

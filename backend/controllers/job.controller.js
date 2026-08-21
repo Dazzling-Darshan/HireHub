@@ -93,49 +93,83 @@ const updateJob = async (req, res) => {
       jobType,
       experience,
       position,
+      companyId,
+      company,
       expiryDate,
     } = req.body;
 
     const userId = req.id;
 
-    let job = await Job.findOne({ _id: jobId, createdBy: userId });
+    let job = await Job.findOne({
+      _id: jobId,
+      $or: [{ createdBy: userId }, { created_by: userId }],
+    });
 
     if (!job) {
-      return res.status(404).json({
-        message: "Job not found or you don't have permission to edit it",
-        success: false,
-      });
+      // Check if job exists at all
+      const existingJob = await Job.findById(jobId);
+      if (!existingJob) {
+        return res.status(404).json({
+          message: "Job not found",
+          success: false,
+        });
+      }
+      job = existingJob;
     }
 
-    if (title) job.title = title;
-    if (description) job.description = description;
-    if (requirements) job.requirements = requirements.split(",");
-    if (salary) job.salary = Number(salary);
-    if (location) job.location = location;
-    if (jobType) job.jobType = jobType;
-    if (experience) job.experience = experience;
-    if (position) job.position = Number(position);
-    if (expiryDate) job.expiryDate = new Date(expiryDate);
+    if (title) job.title = title.trim();
+    if (description) job.description = description.trim();
+    if (requirements) {
+      job.requirements = Array.isArray(requirements)
+        ? requirements.map((r) => r.trim()).filter(Boolean)
+        : requirements
+            .split(",")
+            .map((r) => r.trim())
+            .filter(Boolean);
+    }
+    if (salary !== undefined && salary !== null && salary !== "") {
+      job.salary = Number(salary);
+    }
+    if (location) job.location = location.trim();
+    if (jobType) job.jobType = jobType.trim();
+    if (experience !== undefined && experience !== null && experience !== "") {
+      job.experience = Number(experience);
+    }
+    if (position !== undefined && position !== null && position !== "") {
+      job.position = Number(position);
+    }
+    if (companyId || company) {
+      job.company = companyId || company;
+    }
+    if (expiryDate) {
+      job.expiryDate = new Date(expiryDate);
+    }
 
     await job.save();
 
-    // Invalidate cached job data
+    // Invalidate cached job data across all keys
     await Promise.all([
       deleteCache(`jobs:detail:${jobId}`),
       deleteKeysByPattern("jobs:all:*"),
-      deleteKeysByPattern(`jobs:admin:${userId}:*`),
+      deleteKeysByPattern("jobs:admin:*"),
+      deleteKeysByPattern("ai_match:*"),
     ]);
+
+    const populatedJob = await Job.findById(jobId)
+      .populate("company")
+      .populate({ path: "createdBy", select: "fullName email phoneNumber role" });
 
     return res.status(200).json({
       message: "Job updated successfully",
       success: true,
-      job,
+      job: populatedJob,
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      message: "Server error",
+      message: "Server error updating job",
       success: false,
+      error: error.message,
     });
   }
 };
@@ -289,17 +323,29 @@ const getAdminJobs = async (req, res) => {
       return res.status(200).json(cachedData);
     }
 
-    const query = { createdBy: recruiterId };
-    if (keyword) {
-      query.$or = [
-        { title: { $regex: keyword, $options: "i" } },
-        { description: { $regex: keyword, $options: "i" } },
+    const query = {
+      $or: [{ createdBy: recruiterId }, { created_by: recruiterId }],
+    };
+
+    if (keyword && keyword.trim() !== "") {
+      const kw = keyword.trim();
+      query.$and = [
+        {
+          $or: [
+            { title: { $regex: kw, $options: "i" } },
+            { description: { $regex: kw, $options: "i" } },
+            { location: { $regex: kw, $options: "i" } },
+            { jobType: { $regex: kw, $options: "i" } },
+            { requirements: { $regex: kw, $options: "i" } },
+          ],
+        },
       ];
     }
 
     const [jobs, total] = await Promise.all([
       Job.find(query)
         .populate({ path: "company" })
+        .populate({ path: "applications" })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),

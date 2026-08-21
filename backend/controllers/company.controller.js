@@ -74,9 +74,22 @@ const getCompanies = async (req, res) => {
             return res.status(200).json(cachedData);
         }
 
-        const query = { createdBy: userId };
-        if (keyword) {
-            query.name = { $regex: keyword, $options: "i" };
+        const query = {
+            $or: [{ createdBy: userId }, { created_by: userId }],
+        };
+
+        if (keyword && keyword.trim() !== "") {
+            const kw = keyword.trim();
+            query.$and = [
+                {
+                    $or: [
+                        { name: { $regex: kw, $options: "i" } },
+                        { location: { $regex: kw, $options: "i" } },
+                        { website: { $regex: kw, $options: "i" } },
+                        { description: { $regex: kw, $options: "i" } },
+                    ],
+                },
+            ];
         }
 
         if (!hasPagination) {
@@ -205,6 +218,8 @@ const updateCompany = async (req, res) => {
             deleteKeysByPattern(`companies:user:${userId}:*`),
             deleteKeysByPattern("jobs:all:*"),
             deleteKeysByPattern("jobs:admin:*"),
+            deleteKeysByPattern("jobs:detail:*"),
+            deleteKeysByPattern("ai_match:*"),
         ]);
 
         return res.status(200).json({

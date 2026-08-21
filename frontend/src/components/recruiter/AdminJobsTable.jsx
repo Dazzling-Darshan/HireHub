@@ -2,7 +2,6 @@ import React from "react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -13,7 +12,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../ui/popover";
-import { Edit2, Eye, MoreHorizontal } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { Badge } from "../ui/badge";
+import { Edit2, Eye, MoreHorizontal, Users, MapPin, IndianRupee } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../shared/Pagination";
@@ -28,17 +29,16 @@ const AdminJobsTable = ({ page, onPageChange }) => {
 
   return (
     <div>
-      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
         <Table>
-          <TableCaption className="py-4 text-muted-foreground">
-            A list of your posted jobs
-          </TableCaption>
-
-          <TableHeader className="bg-muted/50">
+          <TableHeader className="bg-muted/40">
             <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="font-bold text-muted-foreground">Company Name</TableHead>
-              <TableHead className="font-bold text-muted-foreground">Role</TableHead>
-              <TableHead className="font-bold text-muted-foreground">Posted Date</TableHead>
+              <TableHead className="font-bold text-muted-foreground">Company</TableHead>
+              <TableHead className="font-bold text-muted-foreground">Job Title</TableHead>
+              <TableHead className="font-bold text-muted-foreground hidden sm:table-cell">Location</TableHead>
+              <TableHead className="font-bold text-muted-foreground hidden md:table-cell">Salary</TableHead>
+              <TableHead className="font-bold text-muted-foreground">Applicants</TableHead>
+              <TableHead className="font-bold text-muted-foreground hidden lg:table-cell">Posted</TableHead>
               <TableHead className="text-right font-bold text-muted-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -47,76 +47,142 @@ const AdminJobsTable = ({ page, onPageChange }) => {
             {!allAdminJobs || allAdminJobs.length === 0 ? (
               <TableRow className="hover:bg-transparent">
                 <TableCell
-                  colSpan={4}
-                  className="text-center py-12 text-muted-foreground font-medium"
+                  colSpan={7}
+                  className="text-center py-16 text-muted-foreground font-medium"
                 >
-                  No jobs posted yet
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <p className="text-base font-bold text-foreground">No jobs posted yet</p>
+                    <p className="text-xs text-muted-foreground">
+                      Click "+ Post New Job" to publish your first opening.
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
-              allAdminJobs.map((job) => (
-                <TableRow
-                  key={job._id}
-                  className="hover:bg-muted/30 transition-colors border-border"
-                >
-                  <TableCell className="font-bold text-foreground">
-                    {job?.company?.name || "N/A"}
-                  </TableCell>
+              allAdminJobs.map((job) => {
+                const applicantCount = Array.isArray(job?.applications)
+                  ? job.applications.length
+                  : 0;
 
-                  <TableCell className="font-medium text-foreground">
-                    {job?.title || "N/A"}
-                  </TableCell>
+                return (
+                  <TableRow
+                    key={job._id}
+                    className="hover:bg-muted/30 transition-colors border-border"
+                  >
+                    {/* Company */}
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 border border-border rounded-xl shadow-xs bg-white shrink-0 p-1 flex items-center justify-center overflow-hidden">
+                          <AvatarImage
+                            src={job?.company?.logo}
+                            alt={job?.company?.name || "Company"}
+                            className="object-contain w-full h-full"
+                          />
+                          <AvatarFallback className="font-bold text-xs bg-primary/10 text-primary rounded-xl">
+                            {(job?.company?.name || "CO").slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-bold text-foreground text-sm truncate max-w-[130px]">
+                          {job?.company?.name || "Independent"}
+                        </span>
+                      </div>
+                    </TableCell>
 
-                  <TableCell className="text-muted-foreground font-medium">
-                    {job?.createdAt?.split("T")[0] || "N/A"}
-                  </TableCell>
+                    {/* Role */}
+                    <TableCell>
+                      <span className="font-bold text-foreground text-sm block">
+                        {job?.title || "Untitled Role"}
+                      </span>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[11px] font-semibold text-primary px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20">
+                          {job?.jobType || "Full-Time"}
+                        </span>
+                        {job?.position && (
+                          <span className="text-[11px] text-muted-foreground font-medium">
+                            {job.position} {job.position === 1 ? "opening" : "openings"}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
 
-                  <TableCell className="text-right">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button className="p-2.5 rounded-xl hover:bg-muted transition-colors border border-transparent hover:border-border">
-                          <MoreHorizontal className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-                        </button>
-                      </PopoverTrigger>
+                    {/* Location */}
+                    <TableCell className="hidden sm:table-cell text-muted-foreground text-sm">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <span className="truncate max-w-[120px]">{job?.location || "Remote"}</span>
+                      </span>
+                    </TableCell>
 
-                      <PopoverContent
-                        className="w-48 p-2 rounded-xl border-border bg-card shadow-lg"
-                        align="end"
+                    {/* Salary */}
+                    <TableCell className="hidden md:table-cell text-emerald-600 font-bold text-sm">
+                      {job?.salary ? `₹${job.salary} LPA` : "Not disclosed"}
+                    </TableCell>
+
+                    {/* Applicants Badge */}
+                    <TableCell>
+                      <button
+                        onClick={() => navigate(`/admin/jobs/${job._id}/applicants`)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all hover:scale-105 ${
+                          applicantCount > 0
+                            ? "bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-primary-foreground"
+                            : "bg-muted text-muted-foreground border border-border"
+                        }`}
                       >
-                        <div
-                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-pointer transition-colors hover:bg-primary/10 hover:text-primary"
-                          onClick={() =>
-                            navigate(`/admin/jobs/${job._id}`)
-                          }
-                        >
-                          <Edit2 size={16} className="text-primary" />
-                          <span className="text-sm font-bold">
-                            Edit Job
-                          </span>
-                        </div>
+                        <Users className="w-3.5 h-3.5" />
+                        <span>{applicantCount} {applicantCount === 1 ? "Applicant" : "Applicants"}</span>
+                      </button>
+                    </TableCell>
 
-                        <div
-                          className="mt-1 flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-pointer transition-colors hover:bg-primary/10 hover:text-primary"
-                          onClick={() =>
-                            navigate(
-                              `/admin/jobs/${job._id}/applicants`
-                            )
-                          }
+                    {/* Posted Date */}
+                    <TableCell className="hidden lg:table-cell text-muted-foreground font-medium text-xs">
+                      {job?.createdAt
+                        ? new Date(job.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })
+                        : "—"}
+                    </TableCell>
+
+                    {/* Actions */}
+                    <TableCell className="text-right">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button className="p-2 rounded-xl hover:bg-muted transition-colors border border-transparent hover:border-border">
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                          </button>
+                        </PopoverTrigger>
+
+                        <PopoverContent
+                          className="w-48 p-1.5 rounded-2xl border-border bg-card shadow-xl"
+                          align="end"
                         >
-                          <Eye size={16} className="text-primary" />
-                          <span className="text-sm font-bold">
-                            View Applicants
-                          </span>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </TableCell>
-                </TableRow>
-              ))
+                          <div
+                            className="flex items-center gap-2.5 rounded-xl px-3 py-2 cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors text-xs font-bold"
+                            onClick={() => navigate(`/admin/jobs/${job._id}`)}
+                          >
+                            <Edit2 size={14} className="text-primary" />
+                            <span>Edit Job</span>
+                          </div>
+
+                          <div
+                            className="flex items-center gap-2.5 rounded-xl px-3 py-2 cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors text-xs font-bold"
+                            onClick={() => navigate(`/admin/jobs/${job._id}/applicants`)}
+                          >
+                            <Users size={14} className="text-indigo-500" />
+                            <span>View Applicants ({applicantCount})</span>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
       </div>
+
       <Pagination
         page={page}
         totalPages={totalPages}
