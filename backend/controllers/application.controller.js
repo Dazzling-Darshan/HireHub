@@ -46,6 +46,13 @@ const applyJob = async (req, res) => {
       });
     }
 
+    if (job.createdBy?.toString() === userId.toString() || job.created_by?.toString() === userId.toString()) {
+      return res.status(400).json({
+        message: "You cannot apply to your own job posting",
+        success: false,
+      });
+    }
+
     const newApplication = await Application.create({
       job: jobId,
       applicant: userId,
@@ -142,6 +149,18 @@ const getApplicant = async (req, res) => {
       });
     }
 
+    const userId = req.id;
+    const isOwner =
+      job.createdBy?.toString() === userId.toString() ||
+      job.created_by?.toString() === userId.toString();
+
+    if (!isOwner) {
+      return res.status(403).json({
+        message: "Forbidden. Only the recruiter who created this job can view its applicants.",
+        success: false,
+      });
+    }
+
     const [applications, total, statusCounts] = await Promise.all([
       Application.find({ job: jobId })
         .sort({ createdAt: -1 })
@@ -200,11 +219,24 @@ const updateStatus = async (req, res) => {
       });
     }
 
-    const application = await Application.findById(applicationId);
+    const application = await Application.findById(applicationId).populate("job");
 
     if (!application) {
       return res.status(404).json({
         message: "Application not found",
+        success: false,
+      });
+    }
+
+    const userId = req.id;
+    const job = application.job;
+    const isOwner =
+      job?.createdBy?.toString() === userId.toString() ||
+      job?.created_by?.toString() === userId.toString();
+
+    if (!isOwner) {
+      return res.status(403).json({
+        message: "Forbidden. Only the recruiter who posted this job can update applicant status.",
         success: false,
       });
     }

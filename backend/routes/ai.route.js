@@ -1,5 +1,5 @@
 import express from 'express';
-import isAuthenticated from '../middlewares/isAuthenticated.js';
+import isAuthenticated, { isRecruiter } from '../middlewares/isAuthenticated.js';
 import { singleUpload } from '../middlewares/multer.js';
 import { aiLimiter } from '../middlewares/rateLimiter.js';
 import {
@@ -22,10 +22,10 @@ router.route('/parse-resume').post(isAuthenticated, singleUpload, parseResume);
 router.route('/skill-match/:jobId').post(isAuthenticated, analyzeCandidateSkillFit);
 
 // Recruiter AI Candidate Ranking
-router.route('/rank-applicants/:jobId').post(isAuthenticated, rankApplicantsForJob);
+router.route('/rank-applicants/:jobId').post(isAuthenticated, isRecruiter, rankApplicantsForJob);
 
 // Recruiter AI Job Description Generation
-router.route('/generate-job-description').post(isAuthenticated, generateJobDescription);
+router.route('/generate-job-description').post(isAuthenticated, isRecruiter, generateJobDescription);
 
 // Grounded Multi-Job RAG Career Navigator
 router.route('/career-navigator').post(isAuthenticated, careerNavigator);

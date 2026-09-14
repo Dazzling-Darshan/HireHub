@@ -200,6 +200,17 @@ const updateCompany = async (req, res) => {
             });
         }
 
+        const isOwner =
+            company.createdBy?.toString() === userId.toString() ||
+            company.created_by?.toString() === userId.toString();
+
+        if (!isOwner) {
+            return res.status(403).json({
+                message: "Forbidden. You can only update companies you registered.",
+                success: false
+            });
+        }
+
         if (file) {
             const fileUri = getDataUri(file);
             const cloudResponse = await cloudinary.uploader.upload(fileUri.content);

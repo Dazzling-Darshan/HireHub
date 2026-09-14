@@ -23,6 +23,7 @@ const isAuthenticated = (req, res, next) => {
         }
 
         req.id = userId;
+        req.role = decoded?.role;
 
         next();
 
@@ -32,6 +33,16 @@ const isAuthenticated = (req, res, next) => {
             success: false
         });
     }
+};
+
+export const isRecruiter = (req, res, next) => {
+    if (req.role && req.role !== 'recruiter') {
+        return res.status(403).json({
+            message: "Access forbidden. Only recruiter accounts can perform this action.",
+            success: false
+        });
+    }
+    next();
 };
 
 export default isAuthenticated;

@@ -10,7 +10,21 @@ const registerUser = async (req, res) => {
 
     if (!fullName || !email || !password || !role || !phoneNumber) {
       return res.status(400).json({
-        message: "Something is missing",
+        message: "All fields (Full Name, Email, Password, Phone, Role) are required",
+        success: false,
+      });
+    }
+
+    if (!["student", "recruiter"].includes(role)) {
+      return res.status(400).json({
+        message: "Invalid role specified. Must be 'student' or 'recruiter'",
+        success: false,
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long",
         success: false,
       });
     }
@@ -106,6 +120,7 @@ const loginUser = async (req, res) => {
 
     const tokenData = {
       userId: user._id,
+      role: user.role,
     };
 
     const token = jwt.sign(tokenData, process.env.JWT_SECRET, {

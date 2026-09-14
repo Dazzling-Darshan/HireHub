@@ -46,15 +46,21 @@ const postJob = async (req, res) => {
       });
     }
 
+    const reqsArray = Array.isArray(requirements)
+      ? requirements.map((r) => String(r).trim()).filter(Boolean)
+      : typeof requirements === "string"
+      ? requirements.split(",").map((r) => r.trim()).filter(Boolean)
+      : [];
+
     const job = await Job.create({
-      title,
-      description,
-      requirements: requirements.split(","),
+      title: title.trim(),
+      description: description.trim(),
+      requirements: reqsArray,
       salary: Number(salary),
-      location,
-      jobType,
-      experience,
-      position,
+      location: location.trim(),
+      jobType: jobType.trim(),
+      experience: Number(experience) || 0,
+      position: Number(position) || 1,
       company: companyId,
       createdBy: userId,
       ...(expiryDate && { expiryDate: new Date(expiryDate) }),
@@ -106,7 +112,6 @@ const updateJob = async (req, res) => {
     });
 
     if (!job) {
-      // Check if job exists at all
       const existingJob = await Job.findById(jobId);
       if (!existingJob) {
         return res.status(404).json({
@@ -114,7 +119,10 @@ const updateJob = async (req, res) => {
           success: false,
         });
       }
-      job = existingJob;
+      return res.status(403).json({
+        message: "Forbidden. You are not authorized to update jobs created by other recruiters.",
+        success: false,
+      });
     }
 
     if (title) job.title = title.trim();
