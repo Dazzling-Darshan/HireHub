@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -9,6 +9,12 @@ import {
 } from "../ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import {
   MoreHorizontal,
   FileText,
   CheckCircle,
@@ -18,6 +24,11 @@ import {
   User,
   Mail,
   Phone,
+  Sparkles,
+  BrainCircuit,
+  CheckCircle2,
+  AlertCircle,
+  X,
 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { updateApplicantStatus } from "@/redux/applicationSlice";
@@ -26,10 +37,19 @@ import axios from "axios";
 import { toast } from "sonner";
 import Pagination from "../shared/Pagination";
 
-const ApplicantsTable = ({ page, onPageChange, searchQuery = "", statusFilter = "all" }) => {
+const ApplicantsTable = ({
+  page,
+  onPageChange,
+  searchQuery = "",
+  statusFilter = "all",
+  rankings = null,
+  sortByScore = false,
+}) => {
   const { applicants, applicantsPagination } = useSelector((store) => store.application);
   const { total = 0, totalPages = 1, limit = 10 } = applicantsPagination || {};
   const dispatch = useDispatch();
+
+  const [selectedEval, setSelectedEval] = useState(null);
 
   const statusHandler = async (status, id) => {
     try {
@@ -41,6 +61,9 @@ const ApplicantsTable = ({ page, onPageChange, searchQuery = "", statusFilter = 
       if (res.data.success) {
         dispatch(updateApplicantStatus({ id, status }));
         toast.success(res.data.message || `Status updated to ${status}`);
+        if (selectedEval?.applicationId === id) {
+          setSelectedEval(null);
+        }
       }
     } catch (error) {
       console.error("Error updating status:", error);
@@ -50,41 +73,89 @@ const ApplicantsTable = ({ page, onPageChange, searchQuery = "", statusFilter = 
 
   const applications = applicants?.applications || [];
 
+  // Map rankings by applicationId and candidateId
+  const rankingsMap = useMemo(() => {
+    const map = new Map();
+    if (Array.isArray(rankings)) {
+      rankings.forEach((r) => {
+        if (r.applicationId) map.set(String(r.applicationId), r);
+        if (r.candidateId) map.set(String(r.candidateId), r);
+      });
+    }
+    return map;
+  }, [rankings]);
+
+  // Enrich applications with AI score
+  const enrichedApplications = useMemo(() => {
+    return applications.map((app) => {
+      const evalData =
+        rankingsMap.get(String(app._id)) ||
+        rankingsMap.get(String(app.applicant?._id)) ||
+        app.aiEvaluation ||
+        null;
+
+      const aiScore =
+        evalData?.score !== undefined && evalData?.score !== null
+          ? evalData.score
+          : evalData?.matchScore !== undefined && evalData?.matchScore !== null
+          ? evalData.matchScore
+          : null;
+
+      return {
+        ...app,
+        aiScore,
+        aiEval: evalData,
+      };
+    });
+  }, [applications, rankingsMap]);
+
   // Filter applications by search query and status filter
-  const filteredApplications = applications.filter((app) => {
-    const candidate = app?.applicant;
-    const nameMatch = candidate?.fullName
-      ?.toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const emailMatch = candidate?.email
-      ?.toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const phoneMatch = candidate?.phoneNumber
-      ?.toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const skillsMatch = Array.isArray(candidate?.profile?.skills)
-      ? candidate.profile.skills.some((s) =>
-          s.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      : false;
-    const resumeMatch = candidate?.profile?.resumeOriginalName
-      ?.toLowerCase()
-      .includes(searchQuery.toLowerCase());
+  const filteredApplications = useMemo(() => {
+    let result = enrichedApplications.filter((app) => {
+      const candidate = app?.applicant;
+      const nameMatch = candidate?.fullName
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const emailMatch = candidate?.email
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const phoneMatch = candidate?.phoneNumber
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const skillsMatch = Array.isArray(candidate?.profile?.skills)
+        ? candidate.profile.skills.some((s) =>
+            s.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : false;
+      const resumeMatch = candidate?.profile?.resumeOriginalName
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
 
-    const matchesSearch =
-      !searchQuery ||
-      nameMatch ||
-      emailMatch ||
-      phoneMatch ||
-      skillsMatch ||
-      resumeMatch;
+      const matchesSearch =
+        !searchQuery ||
+        nameMatch ||
+        emailMatch ||
+        phoneMatch ||
+        skillsMatch ||
+        resumeMatch;
 
-    const currentStatus = (app?.status || "pending").toLowerCase();
-    const matchesStatus =
-      statusFilter === "all" || currentStatus === statusFilter.toLowerCase();
+      const currentStatus = (app?.status || "pending").toLowerCase();
+      const matchesStatus =
+        statusFilter === "all" || currentStatus === statusFilter.toLowerCase();
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus;
+    });
+
+    if (sortByScore) {
+      result = [...result].sort((a, b) => {
+        const scoreA = a.aiScore !== null ? a.aiScore : -1;
+        const scoreB = b.aiScore !== null ? b.aiScore : -1;
+        return scoreB - scoreA;
+      });
+    }
+
+    return result;
+  }, [enrichedApplications, searchQuery, statusFilter, sortByScore]);
 
   return (
     <div>
@@ -95,6 +166,7 @@ const ApplicantsTable = ({ page, onPageChange, searchQuery = "", statusFilter = 
               <TableHead className="font-bold text-muted-foreground">Candidate</TableHead>
               <TableHead className="font-bold text-muted-foreground hidden sm:table-cell">Contact & Skills</TableHead>
               <TableHead className="font-bold text-muted-foreground">Resume</TableHead>
+              <TableHead className="font-bold text-muted-foreground">AI Match</TableHead>
               <TableHead className="font-bold text-muted-foreground hidden md:table-cell">Applied Date</TableHead>
               <TableHead className="font-bold text-muted-foreground">Status</TableHead>
               <TableHead className="text-right font-bold text-muted-foreground">Action</TableHead>
@@ -104,7 +176,7 @@ const ApplicantsTable = ({ page, onPageChange, searchQuery = "", statusFilter = 
           <TableBody>
             {filteredApplications.length === 0 ? (
               <TableRow className="hover:bg-transparent border-border">
-                <TableCell colSpan={6} className="text-center py-16 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-16 text-muted-foreground">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <span className="text-base font-bold text-foreground">
                       No matching applicants found
@@ -210,6 +282,51 @@ const ApplicantsTable = ({ page, onPageChange, searchQuery = "", statusFilter = 
                       )}
                     </TableCell>
 
+                    {/* AI Match Score Column */}
+                    <TableCell>
+                      {app.aiScore !== null ? (
+                        <button
+                          onClick={() =>
+                            setSelectedEval({
+                              applicationId: app._id,
+                              candidate,
+                              evalData: app.aiEval,
+                              currentStatus,
+                            })
+                          }
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all hover:scale-105 shadow-xs cursor-pointer"
+                          style={{
+                            backgroundColor:
+                              app.aiScore >= 75
+                                ? "rgba(16, 185, 129, 0.15)"
+                                : app.aiScore >= 50
+                                ? "rgba(59, 130, 246, 0.15)"
+                                : "rgba(245, 158, 11, 0.15)",
+                            color:
+                              app.aiScore >= 75
+                                ? "#10b981"
+                                : app.aiScore >= 50
+                                ? "#3b82f6"
+                                : "#f59e0b",
+                            border: `1px solid ${
+                              app.aiScore >= 75
+                                ? "rgba(16, 185, 129, 0.3)"
+                                : app.aiScore >= 50
+                                ? "rgba(59, 130, 246, 0.3)"
+                                : "rgba(245, 158, 11, 0.3)"
+                            }`,
+                          }}
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>{app.aiScore}% Match</span>
+                        </button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">
+                          Not ranked
+                        </span>
+                      )}
+                    </TableCell>
+
                     {/* Date */}
                     <TableCell className="hidden md:table-cell text-muted-foreground font-medium text-xs">
                       {formattedDate}
@@ -288,6 +405,105 @@ const ApplicantsTable = ({ page, onPageChange, searchQuery = "", statusFilter = 
         limit={limit}
         onPageChange={onPageChange}
       />
+
+      {/* AI Evaluation Inspection Dialog */}
+      {selectedEval && (
+        <Dialog open={Boolean(selectedEval)} onOpenChange={(open) => !open && setSelectedEval(null)}>
+          <DialogContent className="sm:max-w-lg rounded-3xl p-6 shadow-2xl border border-border bg-card">
+            <DialogHeader>
+              <div className="flex items-center gap-2 text-primary">
+                <BrainCircuit className="w-5 h-5 text-primary" />
+                <DialogTitle className="text-lg font-bold">
+                  AI Candidate Screening Insight
+                </DialogTitle>
+              </div>
+            </DialogHeader>
+
+            <div className="space-y-4 my-2 text-xs">
+              {/* Candidate Info */}
+              <div className="p-3 rounded-2xl bg-muted/40 border border-border flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-foreground text-sm">
+                    {selectedEval.candidate?.fullName || "Candidate"}
+                  </h4>
+                  <p className="text-muted-foreground">{selectedEval.candidate?.email}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-lg font-black text-primary">
+                    {selectedEval.evalData?.score ?? selectedEval.evalData?.matchScore ?? 0}%
+                  </span>
+                  <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+                    {selectedEval.evalData?.recommendation?.replace('_', ' ') || "Evaluated"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Reasoning Summary */}
+              {selectedEval.evalData?.summaryReasoning && (
+                <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
+                  <p className="font-bold text-foreground mb-1">Executive Summary</p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {selectedEval.evalData.summaryReasoning}
+                  </p>
+                </div>
+              )}
+
+              {/* Strengths */}
+              {selectedEval.evalData?.strengths?.length > 0 && (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                  <p className="font-bold text-emerald-600 dark:text-emerald-400 mb-1.5 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Matched Strengths
+                  </p>
+                  <ul className="space-y-1 text-muted-foreground">
+                    {selectedEval.evalData.strengths.map((str, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5">
+                        <span className="text-emerald-500 font-bold">•</span>
+                        <span>{str}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Missing Skills */}
+              {selectedEval.evalData?.missingSkills?.length > 0 && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                  <p className="font-bold text-amber-600 dark:text-amber-400 mb-1.5 flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5" /> Identified Skill Gaps
+                  </p>
+                  <ul className="space-y-1 text-muted-foreground">
+                    {selectedEval.evalData.missingSkills.map((gap, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5">
+                        <span className="text-amber-500 font-bold">•</span>
+                        <span>{gap}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Quick Decision Actions */}
+              <div className="pt-3 border-t border-border flex items-center justify-between gap-3">
+                <span className="text-muted-foreground font-medium">Quick Status Decision:</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => statusHandler("accepted", selectedEval.applicationId)}
+                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" /> Shortlist
+                  </button>
+                  <button
+                    onClick={() => statusHandler("rejected", selectedEval.applicationId)}
+                    className="px-3 py-1.5 rounded-xl bg-destructive hover:bg-destructive/90 text-white font-bold text-xs transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                  >
+                    <XCircle className="w-3.5 h-3.5" /> Reject
+                  </button>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

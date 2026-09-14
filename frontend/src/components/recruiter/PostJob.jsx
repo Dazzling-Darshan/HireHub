@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
-import { ArrowLeft, Building2, Globe, MapPin, Loader2 } from "lucide-react";
+import { ArrowLeft, Building2, Globe, MapPin, Loader2, Sparkles, BrainCircuit } from "lucide-react";
 
 import Navbar from "../shared/Navbar";
 import Footer from "../Footer";
@@ -11,6 +11,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 import {
   Select,
@@ -20,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { JOB_API_ENDPOINT } from "@/utils/constant";
+import { JOB_API_ENDPOINT, AI_API_ENDPOINT } from "@/utils/constant";
 import useGetAllCompanies from "@/hooks/useGetAllCompanies";
 
 const PostJob = () => {
@@ -46,6 +47,65 @@ const PostJob = () => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiDraftInput, setAiDraftInput] = useState({
+    title: "",
+    experience: 2,
+    skills: "",
+    location: "Remote",
+  });
+
+  const handleAiGenerateJob = async (e) => {
+    e?.preventDefault?.();
+    if (!aiDraftInput.title.trim()) {
+      toast.error("Please enter a job title to generate requisition.");
+      return;
+    }
+
+    setAiGenerating(true);
+    try {
+      const res = await axios.post(
+        `${AI_API_ENDPOINT}/generate-job-description`,
+        {
+          title: aiDraftInput.title.trim(),
+          experience: Number(aiDraftInput.experience) || 2,
+          skills: aiDraftInput.skills,
+          companyName: selectedCompany?.name || "Company",
+          location: aiDraftInput.location || input.location || "Remote",
+        },
+        { withCredentials: true }
+      );
+
+      if (res.data.success && res.data.jobData) {
+        const data = res.data.jobData;
+        const formattedResponsibilities =
+          Array.isArray(data.responsibilities) && data.responsibilities.length > 0
+            ? `\n\nCore Responsibilities:\n• ${data.responsibilities.join("\n• ")}`
+            : "";
+
+        setInput((prev) => ({
+          ...prev,
+          title: data.title || prev.title,
+          description: `${data.description || ""}${formattedResponsibilities}`.trim(),
+          requirements: Array.isArray(data.requirements)
+            ? data.requirements.join(", ")
+            : prev.requirements,
+          experience: String(data.suggestedExperienceYears || prev.experience || aiDraftInput.experience),
+          location: aiDraftInput.location || prev.location || "Remote",
+        }));
+
+        setAiModalOpen(false);
+        toast.success("Job description and requirements drafted with Gemini AI!");
+      }
+    } catch (error) {
+      console.error("AI JD drafting error:", error);
+      toast.error(error.response?.data?.message || "Failed to generate job description with AI");
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
 
   // Auto-fill company if provided in URL or if recruiter has exactly 1 company
   useEffect(() => {
@@ -199,24 +259,44 @@ const PostJob = () => {
         <div className="max-w-5xl mx-auto animate-in zoom-in-95 duration-500">
           <div className="bg-card rounded-3xl shadow-xl border border-border p-6 sm:p-10">
             {/* Header */}
-            <div className="flex items-center gap-6 mb-8 pb-6 border-b border-border">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border">
+              <div className="flex items-center gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex items-center gap-2 border-border hover:bg-muted rounded-xl px-4 transition-all"
+                  onClick={() => navigate("/admin/jobs")}
+                >
+                  <ArrowLeft size={18} />
+                  Back
+                </Button>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                    Post New Job Opening
+                  </h1>
+                  <p className="text-muted-foreground mt-1 text-xs sm:text-sm font-medium">
+                    Create a new job requisition and publish it to the candidate pool.
+                  </p>
+                </div>
+              </div>
+
               <Button
                 type="button"
-                variant="outline"
-                className="flex items-center gap-2 border-border hover:bg-muted rounded-xl px-4 transition-all"
-                onClick={() => navigate("/admin/jobs")}
+                onClick={() => {
+                  setAiDraftInput((prev) => ({
+                    ...prev,
+                    title: input.title || prev.title,
+                    skills: input.requirements || prev.skills,
+                    experience: input.experience || prev.experience,
+                    location: input.location || prev.location,
+                  }));
+                  setAiModalOpen(true);
+                }}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-primary via-violet-600 to-indigo-600 text-white rounded-xl px-4 py-2.5 font-bold text-xs shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer w-fit"
               >
-                <ArrowLeft size={18} />
-                Back
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>Draft with Gemini AI</span>
               </Button>
-              <div>
-                <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-                  Post New Job Opening
-                </h1>
-                <p className="text-muted-foreground mt-1 text-sm font-medium">
-                  Create a new job requisition and publish it to the candidate pool.
-                </p>
-              </div>
             </div>
 
             {/* No Company Warning */}
@@ -534,6 +614,99 @@ const PostJob = () => {
           </div>
         </div>
       </div>
+
+      {/* AI Drafting Modal */}
+      <Dialog open={aiModalOpen} onOpenChange={setAiModalOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl p-6 shadow-2xl border border-border bg-card">
+          <DialogHeader>
+            <div className="flex items-center gap-2 text-primary">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <DialogTitle className="text-lg font-bold">
+                AI Job Requisition Generator
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <form onSubmit={handleAiGenerateJob} className="space-y-4 my-2 text-xs">
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              Enter target role parameters, and Gemini AI will automatically generate an industry-grade description, formatted requirements, and responsibilities.
+            </p>
+
+            <div className="space-y-1.5">
+              <Label className="text-foreground font-semibold">Job Title *</Label>
+              <Input
+                placeholder="e.g. Senior Full Stack Engineer"
+                value={aiDraftInput.title}
+                onChange={(e) => setAiDraftInput({ ...aiDraftInput, title: e.target.value })}
+                className="rounded-xl bg-muted/40 text-sm"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-foreground font-semibold">Experience (Years)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={aiDraftInput.experience}
+                  onChange={(e) => setAiDraftInput({ ...aiDraftInput, experience: e.target.value })}
+                  className="rounded-xl bg-muted/40 text-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-foreground font-semibold">Location</Label>
+                <Input
+                  placeholder="e.g. Remote or Bangalore"
+                  value={aiDraftInput.location}
+                  onChange={(e) => setAiDraftInput({ ...aiDraftInput, location: e.target.value })}
+                  className="rounded-xl bg-muted/40 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-foreground font-semibold">Core Tech Stack / Keywords</Label>
+              <Input
+                placeholder="e.g. React, Node.js, MongoDB, Redis, Docker"
+                value={aiDraftInput.skills}
+                onChange={(e) => setAiDraftInput({ ...aiDraftInput, skills: e.target.value })}
+                className="rounded-xl bg-muted/40 text-sm"
+              />
+            </div>
+
+            <div className="pt-3 border-t border-border flex items-center justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAiModalOpen(false)}
+                className="rounded-xl text-xs px-4"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={aiGenerating}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl px-5 shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
+              >
+                {aiGenerating ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Generating Requisition...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Generate Requisition</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </>
   );

@@ -3,15 +3,16 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from './ui/label'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Sparkles } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
-import { USER_API_ENDPOINT } from '@/utils/constant'
+import { USER_API_ENDPOINT, AI_API_ENDPOINT } from '@/utils/constant'
 import { setUser } from '@/redux/authSlice'
 import axios from 'axios'
 import { toast } from 'sonner'
 
 const UpdateProfileDialog = ({ open, setOpen }) => {
     const [loading, setLoading] = useState(false);
+    const [aiParsing, setAiParsing] = useState(false);
     const { user } = useSelector(store => store.auth);
 
     const [input, setInput] = useState({
@@ -25,6 +26,50 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     const [errors, setErrors] = useState({});
 
     const dispatch = useDispatch();
+
+    const handleAiAutoFill = async () => {
+        if (!input.file && !user?.profile?.resume) {
+            toast.error("Please choose a resume PDF first.");
+            return;
+        }
+
+        setAiParsing(true);
+        try {
+            const formData = new FormData();
+            if (input.file) {
+                formData.append("file", input.file);
+            }
+
+            const res = await axios.post(
+                `${AI_API_ENDPOINT}/parse-resume`,
+                formData,
+                { withCredentials: true }
+            );
+
+            if (res.data.success) {
+                const parsed = res.data.parsedResume || {};
+                const newSkills = Array.isArray(res.data.skills) ? res.data.skills.join(', ') : input.skills;
+                const newBio = res.data.bio || parsed.summary || input.bio;
+
+                setInput(prev => ({
+                    ...prev,
+                    bio: newBio.slice(0, 500),
+                    skills: newSkills,
+                }));
+
+                if (res.data.user) {
+                    dispatch(setUser(res.data.user));
+                }
+                toast.success("Profile fields populated from resume via Gemini AI!");
+            }
+        } catch (error) {
+            console.error("AI parse error:", error);
+            toast.error(error.response?.data?.message || "Failed to parse resume with AI");
+        } finally {
+            setAiParsing(false);
+        }
+    };
+
 
     // Synchronize form whenever dialog opens or user state updates
     React.useEffect(() => {
@@ -221,7 +266,20 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
 
                             {/* File Input (fixed UI) */}
                             <div className='space-y-2'>
-                                <Label htmlFor="file" className="text-foreground font-semibold">Resume <span className="text-xs text-muted-foreground font-normal">(PDF only, optional)</span></Label>
+                                <div className="flex justify-between items-center">
+                                    <Label htmlFor="file" className="text-foreground font-semibold">Resume <span className="text-xs text-muted-foreground font-normal">(PDF only)</span></Label>
+                                    {(input.file || user?.profile?.resume) && (
+                                        <button
+                                            type="button"
+                                            onClick={handleAiAutoFill}
+                                            disabled={aiParsing}
+                                            className="inline-flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg border border-primary/20 transition-all cursor-pointer disabled:opacity-60"
+                                        >
+                                            {aiParsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-primary" />}
+                                            <span>{aiParsing ? "Parsing with AI..." : "Auto-Fill Bio & Skills (AI)"}</span>
+                                        </button>
+                                    )}
+                                </div>
                                 <input
                                     id="file"
                                     name="file"
@@ -231,6 +289,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                     className="text-sm cursor-pointer border border-border rounded-xl px-4 py-2.5 w-full bg-muted/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all"
                                 />
                             </div>
+
 
                         </div>
 

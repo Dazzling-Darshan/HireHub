@@ -48,13 +48,18 @@ const jobSchema = new mongoose.Schema({
             ref : 'Application'
         }
     ],
-    expiryDate: {
+        expiryDate: {
         type: Date,
         default: function() {
             const defaultDate = new Date();
             defaultDate.setDate(defaultDate.getDate() + 30);
             return defaultDate;
         }
+    },
+    embedding: {
+        type: [Number],
+        default: undefined,
+        select: false // Excluded by default to minimize MongoDB payload size
     }
 },{timestamps:true});
 

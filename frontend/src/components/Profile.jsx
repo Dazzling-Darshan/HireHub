@@ -3,26 +3,57 @@ import Navbar from './shared/Navbar'
 import Footer from './Footer'
 import { Avatar, AvatarImage } from './ui/avatar'
 import { Button } from './ui/button'
-import { Contact, Mail, Pen, Bookmark, FileText, ArrowLeft } from 'lucide-react'
+import { Contact, Mail, Pen, Bookmark, FileText, ArrowLeft, Sparkles, Loader2, Briefcase, GraduationCap, FolderGit2 } from 'lucide-react'
 import { Badge } from './ui/badge'
 import { Label } from './ui/label'
 import AppliedJobTable from './AppliedJobTable'
 import SavedJobsTable from './SavedJobsTable'
 import UpdateProfileDialog from './UpdateProfileDialog'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { setUser } from '@/redux/authSlice'
+import { AI_API_ENDPOINT } from '@/utils/constant'
+import axios from 'axios'
+import { toast } from 'sonner'
 import useGetAppliedJobs from '@/hooks/useGetAppliedJobs'
 import { useNavigate } from 'react-router-dom'
 
 const Profile = () => {
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const [appliedPage, setAppliedPage] = useState(1)
     const [savedPage, setSavedPage] = useState(1)
+    const [extracting, setExtracting] = useState(false)
     useGetAppliedJobs(appliedPage)
     const { user } = useSelector(store => store.auth)
     const { savedJobs } = useSelector(store => store.job)
     const [open, setOpen] = useState(false)
     const [activeTab, setActiveTab] = useState('applied')
     const isResume = !!user?.profile?.resume
+
+    const handleExtractResume = async () => {
+        if (!isResume) {
+            toast.error("Please upload a resume first.");
+            return;
+        }
+        setExtracting(true);
+        try {
+            const res = await axios.post(
+                `${AI_API_ENDPOINT}/parse-resume`,
+                {},
+                { withCredentials: true }
+            );
+            if (res.data.success) {
+                dispatch(setUser(res.data.user));
+                toast.success("Resume parsed & profile enriched with Gemini AI!");
+            }
+        } catch (error) {
+            console.error("Error extracting resume:", error);
+            toast.error(error.response?.data?.message || "Failed to extract profile details from resume.");
+        } finally {
+            setExtracting(false);
+        }
+    };
+
 
     return (
         <div className="bg-background min-h-screen">
@@ -78,25 +109,48 @@ const Profile = () => {
                             <Contact className="w-5 h-5 text-muted-foreground" />
                             <span className="text-muted-foreground font-medium">{user?.phoneNumber}</span>
                         </div>
-                        <div className="flex items-center gap-3 text-sm">
-                            <FileText className="w-5 h-5 text-muted-foreground" />
-                            {isResume ? (
-                                <a
-                                    target="_blank"
-                                    href={user?.profile?.resume}
-                                    className="text-primary hover:underline font-bold truncate"
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
+                            <div className="flex items-center gap-3 overflow-hidden">
+                                <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
+                                {isResume ? (
+                                    <a
+                                        target="_blank"
+                                        href={user?.profile?.resume}
+                                        className="text-primary hover:underline font-bold truncate max-w-[180px]"
+                                    >
+                                        {user?.profile?.resumeOriginalName || "View Resume PDF"}
+                                    </a>
+                                ) : (
+                                    <span className="text-muted-foreground font-medium">No resume uploaded</span>
+                                )}
+                            </div>
+                            {isResume && (
+                                <button
+                                    onClick={handleExtractResume}
+                                    disabled={extracting}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-gradient-to-r from-primary/15 to-violet-500/15 text-primary border border-primary/30 hover:bg-primary/25 transition-all shadow-xs disabled:opacity-60 cursor-pointer w-fit"
                                 >
-                                    {user?.profile?.resumeOriginalName}
-                                </a>
-                            ) : (
-                                <span className="text-muted-foreground font-medium">No resume uploaded</span>
+                                    {extracting ? (
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                        <Sparkles className="w-3.5 h-3.5 text-primary" />
+                                    )}
+                                    <span>{extracting ? "Extracting with AI..." : "AI Auto-Extract"}</span>
+                                </button>
                             )}
                         </div>
                     </div>
 
                     {/* Skills */}
                     <div className="mt-8">
-                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">Skills</p>
+                        <div className="flex items-center justify-between mb-3">
+                            <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Skills</p>
+                            {user?.profile?.parsedResume?.extractedAt && (
+                                <span className="text-[11px] text-primary/80 font-medium flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3" /> Enriched by Gemini AI
+                                </span>
+                            )}
+                        </div>
                         <div className="flex flex-wrap gap-2">
                             {user?.profile?.skills?.length > 0
                                 ? user.profile.skills.map((item, index) => (
@@ -111,6 +165,92 @@ const Profile = () => {
                             }
                         </div>
                     </div>
+
+                    {/* AI-Extracted Profile Details (Experience, Projects, Education) */}
+                    {user?.profile?.parsedResume && (
+                        <div className="mt-8 pt-6 border-t border-border space-y-6 animate-in fade-in duration-300">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-primary" />
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                                    AI-Parsed Career Highlights
+                                </h3>
+                            </div>
+
+                            {/* Experience */}
+                            {user.profile.parsedResume.experience?.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                        <Briefcase className="w-3.5 h-3.5 text-primary" /> Experience
+                                    </p>
+                                    <div className="space-y-3">
+                                        {user.profile.parsedResume.experience.map((exp, idx) => (
+                                            <div key={idx} className="p-3.5 rounded-xl bg-muted/40 border border-border">
+                                                <div className="flex justify-between items-start flex-wrap gap-1">
+                                                    <span className="font-bold text-foreground text-sm">{exp.role}</span>
+                                                    <span className="text-xs text-primary font-medium">{exp.duration}</span>
+                                                </div>
+                                                <p className="text-xs text-muted-foreground font-medium mt-0.5">{exp.company}</p>
+                                                {exp.highlights?.length > 0 && (
+                                                    <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                                                        {exp.highlights.slice(0, 2).map((h, hIdx) => (
+                                                            <li key={hIdx} className="flex items-start gap-1.5">
+                                                                <span className="text-primary">•</span>
+                                                                <span>{h}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Projects */}
+                            {user.profile.parsedResume.projects?.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                        <FolderGit2 className="w-3.5 h-3.5 text-primary" /> Projects
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {user.profile.parsedResume.projects.map((proj, idx) => (
+                                            <div key={idx} className="p-3 rounded-xl bg-muted/30 border border-border">
+                                                <span className="font-bold text-foreground text-xs">{proj.title}</span>
+                                                <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{proj.description}</p>
+                                                {proj.techStack?.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 mt-2">
+                                                        {proj.techStack.map((t, tIdx) => (
+                                                            <span key={tIdx} className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
+                                                                {t}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Education */}
+                            {user.profile.parsedResume.education?.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                        <GraduationCap className="w-3.5 h-3.5 text-primary" /> Education
+                                    </p>
+                                    <div className="flex flex-wrap gap-3">
+                                        {user.profile.parsedResume.education.map((edu, idx) => (
+                                            <div key={idx} className="text-xs p-2.5 rounded-lg bg-muted/30 border border-border">
+                                                <span className="font-bold text-foreground">{edu.degree}</span>
+                                                <span className="text-muted-foreground"> • {edu.institution}</span>
+                                                {edu.year && <span className="text-primary font-medium"> ({edu.year})</span>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Jobs section with tabs */}

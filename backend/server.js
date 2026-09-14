@@ -16,6 +16,9 @@ import aiRoutes from './routes/ai.route.js';
 import path from "path";
 
 dotenv.config();
+if (!process.env.MONGO_URI) {
+  dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
+}
 
 const app = express();
 

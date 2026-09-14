@@ -5,8 +5,12 @@ import ApplicantsTable from "./ApplicantsTable";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useGetApplicants from "@/hooks/useGetApplicants";
-import { ArrowLeft, Users, UserCheck, UserX, Clock, Search, X, Filter } from "lucide-react";
+import { ArrowLeft, Users, UserCheck, UserX, Clock, Search, X, Filter, Sparkles, Loader2, ArrowUpDown } from "lucide-react";
 import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { AI_API_ENDPOINT } from "@/utils/constant";
+import axios from "axios";
+import { toast } from "sonner";
 
 const Applicants = () => {
   const { id } = useParams();
@@ -14,6 +18,9 @@ const Applicants = () => {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [rankings, setRankings] = useState(null);
+  const [aiRankingLoading, setAiRankingLoading] = useState(false);
+  const [sortByScore, setSortByScore] = useState(false);
 
   useGetApplicants(id, page);
 
@@ -23,6 +30,33 @@ const Applicants = () => {
   const acceptedApplicants = applicantStats?.accepted || 0;
   const rejectedApplicants = applicantStats?.rejected || 0;
   const pendingApplicants = applicantStats?.pending || 0;
+
+  const handleAiRankApplicants = async () => {
+    if (totalApplicants === 0) {
+      toast.error("No applicants to evaluate yet for this role.");
+      return;
+    }
+
+    setAiRankingLoading(true);
+    try {
+      const res = await axios.post(
+        `${AI_API_ENDPOINT}/rank-applicants/${id}`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        setRankings(res.data.rankings || []);
+        setSortByScore(true);
+        toast.success(res.data.message || "Applicants evaluated & ranked with Gemini AI!");
+      }
+    } catch (error) {
+      console.error("Error ranking applicants:", error);
+      toast.error(error.response?.data?.message || "Failed to rank applicants with AI");
+    } finally {
+      setAiRankingLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,8 +96,23 @@ const Applicants = () => {
               </p>
             </div>
 
-            <div className="bg-primary/10 text-primary font-bold px-5 py-2 rounded-full text-sm border border-primary/20 w-fit shadow-xs">
-              Total Applicants: {totalApplicants}
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={handleAiRankApplicants}
+                disabled={aiRankingLoading || totalApplicants === 0}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-primary via-violet-600 to-indigo-600 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none cursor-pointer"
+              >
+                {aiRankingLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                )}
+                <span>{aiRankingLoading ? "Evaluating Candidates..." : "AI Rank & Screen Applicants"}</span>
+              </button>
+
+              <div className="bg-primary/10 text-primary font-bold px-4 py-2 rounded-full text-xs border border-primary/20 w-fit shadow-xs">
+                Total: {totalApplicants}
+              </div>
             </div>
           </div>
         </div>
@@ -187,21 +236,35 @@ const Applicants = () => {
             )}
           </div>
 
-          {/* Filter Tabs */}
-          <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-xl border border-border self-start sm:self-auto">
-            {["all", "accepted", "pending", "rejected"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setStatusFilter(tab)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all capitalize ${
-                  statusFilter === tab
-                    ? "bg-card text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {tab === "all" ? "All Candidates" : tab === "accepted" ? "Shortlisted" : tab}
-              </button>
-            ))}
+          {/* Filter Tabs & Sort Toggle */}
+          <div className="flex items-center gap-3 flex-wrap self-start sm:self-auto">
+            <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-xl border border-border">
+              {["all", "accepted", "pending", "rejected"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setStatusFilter(tab)}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all capitalize ${
+                    statusFilter === tab
+                      ? "bg-card text-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tab === "all" ? "All Candidates" : tab === "accepted" ? "Shortlisted" : tab}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setSortByScore(!sortByScore)}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                sortByScore
+                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                  : "bg-muted/50 text-muted-foreground hover:text-foreground border-border"
+              }`}
+            >
+              <ArrowUpDown className="w-3.5 h-3.5" />
+              <span>{sortByScore ? "Ranked: Highest Score First" : "Sort by AI Match"}</span>
+            </button>
           </div>
         </div>
 
@@ -212,6 +275,9 @@ const Applicants = () => {
             onPageChange={setPage}
             searchQuery={searchQuery}
             statusFilter={statusFilter}
+            rankings={rankings}
+            sortByScore={sortByScore}
+            onToggleSortByScore={() => setSortByScore(!sortByScore)}
           />
         </div>
       </div>

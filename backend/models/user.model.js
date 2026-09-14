@@ -32,6 +32,32 @@ const userSchema = new mongoose.Schema({
         profilePhoto :{
             type : String,
             default :""
+        },
+        parsedResume: {
+            extractedAt: { type: Date },
+            summary: { type: String },
+            education: [{
+                degree: { type: String },
+                institution: { type: String },
+                year: { type: String }
+            }],
+            experience: [{
+                role: { type: String },
+                company: { type: String },
+                duration: { type: String },
+                highlights: [{ type: String }]
+            }],
+            projects: [{
+                title: { type: String },
+                description: { type: String },
+                techStack: [{ type: String }]
+            }],
+            rawSkills: [{ type: String }]
+        },
+        resumeEmbedding: {
+            type: [Number],
+            default: undefined,
+            select: false
         }
     },
 

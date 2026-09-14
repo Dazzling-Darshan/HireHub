@@ -65,3 +65,20 @@ export const applyLimiter = rateLimit({
   },
   store: createRedisStore('apply'),
 });
+
+/**
+ * AI Endpoints Rate Limiter
+ * 25 requests per 10 minutes per IP/User to protect API quotas and prevent token exhaustion
+ */
+export const aiLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 25,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many AI requests recently. Please wait a few moments before trying again.',
+  },
+  store: createRedisStore('ai'),
+});
+

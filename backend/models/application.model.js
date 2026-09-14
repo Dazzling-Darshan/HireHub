@@ -15,6 +15,17 @@ const applicationSchema = new mongoose.Schema({
         type : String,
         enum:['pending','accepted','rejected'],
         default : "pending"
+    },
+    aiEvaluation: {
+        score: { type: Number },
+        recommendation: {
+            type: String,
+            enum: ['strong_hire', 'hire', 'possible_fit', 'not_recommended']
+        },
+        strengths: [{ type: String }],
+        missingSkills: [{ type: String }],
+        summaryReasoning: { type: String },
+        evaluatedAt: { type: Date }
     }
 
 },{timestamps:true});

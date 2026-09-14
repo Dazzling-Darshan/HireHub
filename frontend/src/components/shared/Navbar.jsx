@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "../ui/button";
-import { LogOut, User2, Sun, Moon, Menu, X, Briefcase, Building2, Search, Home as HomeIcon } from "lucide-react";
+import { LogOut, User2, Sun, Moon, Menu, X, Briefcase, Building2, Search, Home as HomeIcon, Sparkles } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { USER_API_ENDPOINT } from "@/utils/constant";
 import axios from "axios";
@@ -13,6 +13,7 @@ import { clearUserJobData } from "@/redux/jobSlice";
 import { setCompanies } from "@/redux/companySlice";
 import { setApplicants } from "@/redux/applicationSlice";
 import { useTheme } from "@/context/ThemeContext";
+import CareerNavigatorDialog from "../CareerNavigatorDialog";
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
@@ -21,6 +22,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navigatorOpen, setNavigatorOpen] = useState(false);
 
   const logoutHandler = async () => {
     try {
@@ -128,9 +130,20 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Right Section: Theme Toggle + Auth / Profile */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        {/* Right Section: Theme Toggle + AI Navigator + Auth / Profile */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
           
+          {/* AI Career Navigator Button */}
+          <button
+            onClick={() => setNavigatorOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-primary/25 bg-gradient-to-r from-primary/10 via-violet-500/10 to-indigo-500/10 hover:from-primary/20 hover:to-violet-500/20 text-primary font-semibold text-xs transition-all duration-300 shadow-sm hover:shadow-primary/15 hover:scale-105 active:scale-95 cursor-pointer group"
+            title="Open AI Career Navigator & Multi-Job RAG"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-primary group-hover:rotate-12 transition-transform duration-300" />
+            <span className="hidden sm:inline">AI Navigator</span>
+            <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-bold">RAG</span>
+          </button>
+
           {/* Dark / Light Mode Toggle Button */}
           <button
             onClick={toggleTheme}
@@ -294,6 +307,21 @@ const Navbar = () => {
               </>
             )}
 
+            {/* Mobile AI Career Navigator Button */}
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setNavigatorOpen(true);
+              }}
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-r from-primary/15 to-violet-500/15 border border-primary/25 text-primary font-semibold text-sm hover:bg-primary/20 transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                <Sparkles size={18} className="text-primary" />
+                <span>AI Career Navigator</span>
+              </div>
+              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-primary/20 text-primary font-bold">RAG</span>
+            </button>
+
             {!user ? (
               <div className="flex flex-col gap-2 pt-3 mt-2 border-t border-border">
                 <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
@@ -331,6 +359,9 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      {/* Grounded Multi-Job RAG Career Navigator Dialog */}
+      <CareerNavigatorDialog open={navigatorOpen} setOpen={setNavigatorOpen} />
     </nav>
   );
 };

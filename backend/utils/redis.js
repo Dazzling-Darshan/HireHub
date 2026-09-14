@@ -12,15 +12,17 @@ export const CACHE_TTL = {
 
 let redis = null;
 let isRedisReady = false;
+let hasWarnedAboutRedis = false;
 
 try {
   const redisOptions = {
     maxRetriesPerRequest: 1,
+    enableOfflineQueue: false,
     retryStrategy(times) {
-      if (times > 5) {
-        return null;
+      if (times > 2) {
+        return null; // Stop retrying after 2 attempts to avoid console log spam
       }
-      return Math.min(times * 1000, 3000);
+      return 1000;
     },
     reconnectOnError(err) {
       const targetError = 'READONLY';
@@ -60,7 +62,10 @@ try {
 
   redis.on('error', (err) => {
     isRedisReady = false;
-    console.warn('[Redis] Connection Warning:', err.message);
+    if (!hasWarnedAboutRedis) {
+      hasWarnedAboutRedis = true;
+      console.warn(`[Redis] Notice: Remote Redis instance unreachable (${err.message}). Application is running smoothly with in-memory caching.`);
+    }
   });
 
   redis.on('close', () => {
