@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import Navbar from './components/shared/Navbar'
 import Home from './components/Home'
 import Login from './components/auth/Login'
@@ -16,7 +16,6 @@ import EditJob from './components/recruiter/EditJob'
 import Applicants from './components/recruiter/Applicants'
 import PrivacyPolicy from './components/PrivacyPolicy'
 import TermsAndConditions from './components/TermsAndConditions'
-import ContactUs from './components/ContactUs'
 import HelpCenter from './components/HelpCenter'
 import FAQs from './components/FAQs'
 import ScrollToTop from './components/shared/ScrollToTop'
@@ -61,7 +60,7 @@ const appRouter = createBrowserRouter([
   },
   {
     path:'/contact',
-    element:<><ScrollToTop /><ContactUs/></>
+    element:<Navigate to="/help" replace />
   },
   {
     path:'/help',

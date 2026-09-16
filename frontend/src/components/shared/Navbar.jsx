@@ -133,16 +133,18 @@ const Navbar = () => {
         {/* Right Section: Theme Toggle + AI Navigator + Auth / Profile */}
         <div className="flex items-center gap-2.5 sm:gap-3">
           
-          {/* AI Career Navigator Button */}
-          <button
-            onClick={() => setNavigatorOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-primary/25 bg-gradient-to-r from-primary/10 via-violet-500/10 to-indigo-500/10 hover:from-primary/20 hover:to-violet-500/20 text-primary font-semibold text-xs transition-all duration-300 shadow-sm hover:shadow-primary/15 hover:scale-105 active:scale-95 cursor-pointer group"
-            title="Open AI Career Navigator & Multi-Job RAG"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-primary group-hover:rotate-12 transition-transform duration-300" />
-            <span className="hidden sm:inline">AI Navigator</span>
-            <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-bold">RAG</span>
-          </button>
+          {/* AI Career Navigator Button (Hidden for Recruiters) */}
+          {user?.role !== "recruiter" && (
+            <button
+              onClick={() => setNavigatorOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-primary/25 bg-gradient-to-r from-primary/10 via-violet-500/10 to-indigo-500/10 hover:from-primary/20 hover:to-violet-500/20 text-primary font-semibold text-xs transition-all duration-300 shadow-sm hover:shadow-primary/15 hover:scale-105 active:scale-95 cursor-pointer group"
+              title="Open AI Career Navigator & Multi-Job RAG"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-primary group-hover:rotate-12 transition-transform duration-300" />
+              <span className="hidden sm:inline">AI Navigator</span>
+              <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary font-bold">RAG</span>
+            </button>
+          )}
 
           {/* Dark / Light Mode Toggle Button */}
           <button
@@ -307,20 +309,22 @@ const Navbar = () => {
               </>
             )}
 
-            {/* Mobile AI Career Navigator Button */}
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setNavigatorOpen(true);
-              }}
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-r from-primary/15 to-violet-500/15 border border-primary/25 text-primary font-semibold text-sm hover:bg-primary/20 transition-colors text-left"
-            >
-              <div className="flex items-center gap-3">
-                <Sparkles size={18} className="text-primary" />
-                <span>AI Career Navigator</span>
-              </div>
-              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-primary/20 text-primary font-bold">RAG</span>
-            </button>
+            {/* Mobile AI Career Navigator Button (Hidden for Recruiters) */}
+            {user?.role !== "recruiter" && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setNavigatorOpen(true);
+                }}
+                className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-r from-primary/15 to-violet-500/15 border border-primary/25 text-primary font-semibold text-sm hover:bg-primary/20 transition-colors text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <Sparkles size={18} className="text-primary" />
+                  <span>AI Career Navigator</span>
+                </div>
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-primary/20 text-primary font-bold">RAG</span>
+              </button>
+            )}
 
             {!user ? (
               <div className="flex flex-col gap-2 pt-3 mt-2 border-t border-border">
@@ -360,8 +364,10 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* Grounded Multi-Job RAG Career Navigator Dialog */}
-      <CareerNavigatorDialog open={navigatorOpen} setOpen={setNavigatorOpen} />
+      {/* Grounded Multi-Job RAG Career Navigator Dialog (Students / Guests only) */}
+      {user?.role !== "recruiter" && (
+        <CareerNavigatorDialog open={navigatorOpen} setOpen={setNavigatorOpen} />
+      )}
     </nav>
   );
 };

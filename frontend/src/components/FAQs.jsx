@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import Navbar from './shared/Navbar'
 import Footer from './Footer'
 import { ChevronDown, ChevronUp } from 'lucide-react'
@@ -41,7 +42,7 @@ const FAQs = () => {
     },
     {
       question: 'How do I delete my account?',
-      answer: 'If you wish to delete your account, please contact our support team through the Contact Us page. We will process your request within 48 hours.'
+      answer: 'If you wish to delete your account, you can manage or deactivate your profile directly from your Account Profile settings.'
     },
     {
       question: 'How do employers contact me?',
@@ -81,9 +82,9 @@ const FAQs = () => {
 
         <div className="mt-16 text-center bg-primary/5 rounded-3xl p-10 border border-primary/10">
           <p className="text-muted-foreground mb-6 font-bold text-lg">Still have questions?</p>
-          <a href="/contact" className="inline-block bg-primary text-primary-foreground font-bold px-8 py-4 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5">
-            Contact Us
-          </a>
+          <Link to="/help" className="inline-block bg-primary text-primary-foreground font-bold px-8 py-4 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5">
+            Visit Help Center
+          </Link>
         </div>
       </div>
       <Footer />

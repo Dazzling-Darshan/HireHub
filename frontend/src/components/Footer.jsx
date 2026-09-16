@@ -40,9 +40,6 @@ const Footer = () => {
                 <li>
                   <Link to="/browse" className="hover:text-primary transition-colors duration-200">Browse</Link>
                 </li>
-                <li>
-                  <Link to="/contact" className="hover:text-primary transition-colors duration-200">Contact</Link>
-                </li>
               </ul>
             </div>
           )}

@@ -35,6 +35,10 @@ const CareerNavigatorDialog = ({ open, setOpen }) => {
   const navigate = useNavigate();
   const { user } = useSelector((store) => store.auth);
 
+  if (user?.role === "recruiter") {
+    return null;
+  }
+
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);

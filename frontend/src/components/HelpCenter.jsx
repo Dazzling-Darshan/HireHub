@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Navbar from './shared/Navbar'
 import Footer from './Footer'
+import { Link } from 'react-router-dom'
 import { Search, BookOpen, Briefcase, User, Shield, HelpCircle } from 'lucide-react'
 
 const HelpCenter = () => {
@@ -102,11 +103,11 @@ const HelpCenter = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-primary-foreground/0 via-primary-foreground/5 to-primary-foreground/0 pointer-events-none" />
           <h2 className="text-3xl font-extrabold mb-4">Still Need Help?</h2>
           <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto text-lg font-medium">
-            If you couldn't find the answer you're looking for, our support team is here to help.
+            Browse our comprehensive FAQ section to find quick solutions to common questions and guides.
           </p>
-          <a href="/contact" className="inline-block bg-background text-foreground font-bold px-8 py-4 rounded-xl hover:bg-muted transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5">
-            Contact Support
-          </a>
+          <Link to="/faqs" className="inline-block bg-background text-foreground font-bold px-8 py-4 rounded-xl hover:bg-muted transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5">
+            View FAQs
+          </Link>
         </div>
       </div>
       <Footer />
