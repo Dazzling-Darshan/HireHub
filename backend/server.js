@@ -31,8 +31,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+const defaultOrigins = ["https://job-portal-8j14.onrender.com", "http://localhost:5173"];
+const envOrigins = (process.env.CLIENT_URL || process.env.FRONTEND_URL || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+const allowedOrigins = envOrigins.length > 0
+    ? Array.from(new Set([...defaultOrigins, ...envOrigins]))
+    : defaultOrigins;
+
 const corsOptions = {
-    origin: ["https://job-portal-8j14.onrender.com", "http://localhost:5173"],
+    origin: allowedOrigins,
     credentials: true,
 };
 

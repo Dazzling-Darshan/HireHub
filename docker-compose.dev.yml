@@ -1,0 +1,85 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: hirehub-mongodb-dev
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_dev_data:/data/db
+    networks:
+      - hirehub-dev-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: hirehub-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - hirehub-dev-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  backend:
+    image: node:20-alpine
+    container_name: hirehub-backend-dev
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: 8000
+      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/portal}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      JWT_SECRET: ${JWT_SECRET:-supersecretjwtkey_dev_12345}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:5173}
+      CLOUD_NAME: ${CLOUD_NAME:-}
+      API_KEY: ${API_KEY:-}
+      API_SECRET: ${API_SECRET:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    command: sh -c "npm install && npx nodemon backend/server.js"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hirehub-dev-network
+
+  frontend:
+    image: node:20-alpine
+    container_name: hirehub-frontend-dev
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api/v1
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    depends_on:
+      - backend
+    networks:
+      - hirehub-dev-network
+
+volumes:
+  mongodb_dev_data:
+  redis_dev_data:
+
+networks:
+  hirehub-dev-network:
+    driver: bridge

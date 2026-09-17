@@ -147,6 +147,58 @@ This is a full-stack Job Portal application, named HireHub, designed to connect 
     ```
     The frontend application will usually be accessible at `http://localhost:5173` (or an alternative port if 5173 is occupied).
 
+---
+
+## 🐳 Docker Deployment & Containerization
+
+HireHub is fully containerized and supports multiple Docker workflows:
+
+### Option 1: Full-Stack Microservices with Docker Compose (Recommended)
+
+This orchestrates the frontend (with Nginx), backend API, containerized MongoDB 7.0, and Redis cache automatically.
+
+```bash
+# Start all services (MongoDB, Redis, Backend, Frontend) in background
+docker compose up --build -d
+
+# Check status of containers
+docker compose ps
+
+# View live logs
+docker compose logs -f
+
+# Stop all services
+docker compose down
+```
+
+- **Frontend Application**: `http://localhost:5173`
+- **Backend API**: `http://localhost:8000/api/v1`
+- **Backend Health Check**: `http://localhost:8000/api/v1/health`
+
+*(Persistent volumes `mongodb_data` and `redis_data` ensure your local database and cache state are saved across container restarts).*
+
+### Option 2: Live Development with Docker (Hot Reloading)
+
+If you want code changes to reflect immediately inside Docker without rebuilding:
+
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
+
+### Option 3: All-in-One Production Monolith Image
+
+To build and run a single, self-contained container (ideal for PaaS like Render, Railway, AWS ECS, DigitalOcean):
+
+```bash
+# Build the unified image
+docker build -t hirehub-app .
+
+# Run with environment variables from .env
+docker run -d -p 8000:8000 --env-file .env --name hirehub hirehub-app
+```
+
+---
+
 ## Contributing
 
 We welcome contributions to the Job Portal application! If you have suggestions for improvements, new features, or bug fixes, please follow these steps:
